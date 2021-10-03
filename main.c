@@ -33,8 +33,8 @@
   Student General Misconduct may arise regardless of whether or not I personally
   make use of such solutions or sought benefit from such actions.
 
-  Signed by: [Enter your full name and student number here before submission]
-  Dated:     [Enter the date that you "signed" the declaration]
+  Signed by: Zhirong Lin 1264039
+  Dated:     04/10/2021
 
 */
 

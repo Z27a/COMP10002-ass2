@@ -7,6 +7,12 @@
 #IncludeRegexTransform: 
 
 /mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/main.c
+stdlib.h
+-
 stdio.h
+-
+limits.h
+-
+assert.h
 -
 
