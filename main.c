@@ -62,13 +62,21 @@ typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 /* #defines and function prototypes ------------------------------------------*/
 #define TRUE 1
 #define FALSE 0
+#define NUM_PIECES (ROWS_WITH_PIECES*BOARD_SIZE)
 
+#define ROW_SEP "+---+---+---+---+---+---+---+---+"
+#define COL_SEP "|"
 
 void do_stage0(board_t board);
 
 void init_board(board_t board);
 
 void fill_pieces(int row_even, int row, board_t board, char piece);
+
+void prt_board(board_t board);
+
+void pad();
+void newline();
 
 int
 main(int argc, char *argv[]) {
@@ -85,6 +93,13 @@ main(int argc, char *argv[]) {
 /* Stage 0 */
 void do_stage0(board_t board) {
     init_board(board);
+
+    /* Print initial board config and info */
+    printf("BOARD SIZE: %dx%d\n", BOARD_SIZE, BOARD_SIZE);
+    printf("#BLACK PIECES: %d\n", NUM_PIECES);
+    printf("#WHITE PIECES: %d\n", NUM_PIECES);
+    prt_board(board);
+
 }
 
 
@@ -138,4 +153,52 @@ void fill_pieces(int row_even, int row, board_t board, char piece) {
     }
 }
 
+
+/* Prints the board with formatting */
+void prt_board(board_t board) {
+    /* Column letters */
+    pad();
+    for (int col = 0; col < BOARD_SIZE; col++) {
+        printf("  %c", 'A' + col);
+        if (col + 1 < BOARD_SIZE) {
+            printf(" ");
+        } else {
+            newline();
+        }
+    }
+
+    /* initial row separator */
+    pad();
+    printf("%s", ROW_SEP);
+    newline();
+
+    /* Rest of the rows */
+    for (int row = 0; row < BOARD_SIZE; row++) {
+        /* Row number */
+        printf(" %d ", row + 1);
+
+        /* Board contents */
+        for (int col = 0; col < BOARD_SIZE; col++) {
+            printf("%s %c ", COL_SEP, board[row][col]);
+            if (col + 1 == BOARD_SIZE) {
+                printf("%s", COL_SEP);
+                newline();
+            }
+        }
+
+        /* Row separator */
+        pad();
+        printf("%s", ROW_SEP);
+        newline();
+    }
+}
+
+
+void pad() {
+    printf("   ");
+}
+
+void newline() {
+    printf("\n");
+}
 /* THE END -------------------------------------------------------------------*/
