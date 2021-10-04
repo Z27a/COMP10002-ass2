@@ -59,14 +59,25 @@
 /* one type definition from my sample solution -------------------------------*/
 typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 
-/* #defines and function prototypes ------------------------------------------*/
+/* #defines ------------------------------------------------------------------*/
 #define TRUE 1
 #define FALSE 0
 #define NUM_PIECES (ROWS_WITH_PIECES*BOARD_SIZE)
 
+// TODO: make row sep dynamic?
 #define ROW_SEP "+---+---+---+---+---+---+---+---+"
 #define COL_SEP "|"
 
+/* typedefs ------------------------------------------------------------------*/
+typedef struct {
+    int f_row;
+    int f_col;
+    int t_row;
+    int t_col;
+} move_t;
+
+
+/* function prototypes -------------------------------------------------------*/
 void do_stage0(board_t board);
 
 void init_board(board_t board);
@@ -75,11 +86,16 @@ void fill_pieces(int row_even, int row, board_t board, char piece);
 
 void prt_board(board_t board);
 
+int prt_from_input(board_t board);
+
+
 void pad();
 void newline();
 
 int
 main(int argc, char *argv[]) {
+    //TODO: Add function separator lines after i've finished
+
     // YOUR IMPLEMENTATION OF STAGES 0-2
     board_t board;
 
@@ -92,6 +108,8 @@ main(int argc, char *argv[]) {
 
 /* Stage 0 */
 void do_stage0(board_t board) {
+    int instruction;
+
     init_board(board);
 
     /* Print initial board config and info */
@@ -100,6 +118,10 @@ void do_stage0(board_t board) {
     printf("#WHITE PIECES: %d\n", NUM_PIECES);
     prt_board(board);
 
+    /* Read input and print out changes to board. Print errors if input is not
+     * valid */
+    instruction = prt_from_input(board);
+    // Need to check if a player wins every time?
 }
 
 
@@ -191,6 +213,23 @@ void prt_board(board_t board) {
         printf("%s", ROW_SEP);
         newline();
     }
+}
+
+
+int prt_from_input(board_t board) {
+    char c1, c2, c3, c4;
+    move_t move;
+
+    // could use a struct of two moves for an action
+    while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) != EOF) {
+        //printf("yeh: %c %c %c %c\n", c1, c2, c3, c4);
+        move.f_col = c1 - 'A';
+        move.f_row = c2 - '0';
+        move.t_col = c3 - 'A';
+        move.t_row = c4 - '0';
+        
+    }
+    return 0;
 }
 
 
