@@ -59,11 +59,83 @@
 /* one type definition from my sample solution -------------------------------*/
 typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 
+/* #defines and function prototypes ------------------------------------------*/
+#define TRUE 1
+#define FALSE 0
+
+
+void do_stage0(board_t board);
+
+void init_board(board_t board);
+
+void fill_pieces(int row_even, int row, board_t board, char piece);
+
 int
 main(int argc, char *argv[]) {
     // YOUR IMPLEMENTATION OF STAGES 0-2
+    board_t board;
+
+    do_stage0(board);
+
 
     return EXIT_SUCCESS;            // exit program with the success code
+}
+
+
+/* Stage 0 */
+void do_stage0(board_t board) {
+    init_board(board);
+}
+
+
+/* Loads the initial configuration into the board */
+void init_board(board_t board) {
+    /* Assumes that the top left cell is always white and white pieces go
+     * on the top of tbe board */
+
+    /* Loop through rows and add values */
+    int top, mid, btm;
+
+    /* Top rows with white pieces */
+    for (top = 0; top < ROWS_WITH_PIECES; top++) {
+        fill_pieces(((top + 1) % 2 == 0), top, board, CELL_WPIECE);
+    }
+    /* Middle rows with no pieces */
+    for (mid = top; mid < BOARD_SIZE - ROWS_WITH_PIECES; mid++) {
+        for (int cell = 0; cell < BOARD_SIZE; cell++) {
+            board[mid][cell] = CELL_EMPTY;
+        }
+    }
+    /* Bottom rows with black pieces */
+    for (btm = mid; btm < BOARD_SIZE; btm++) {
+        fill_pieces(((btm + 1) % 2 == 0), btm, board, CELL_BPIECE);
+    }
+}
+
+
+/* Fills in a row that contains pieces */
+void fill_pieces(int row_even, int row, board_t board, char piece) {
+    int was_piece;
+
+    if (row_even) {
+        /* Row starts with a piece */
+        was_piece = FALSE;
+    } else {
+        /* Row doesn't start with a piece */
+        was_piece = TRUE;
+    }
+
+    for (int col = 0; col < BOARD_SIZE; col++) {
+        if (was_piece) {
+            /* Current cell is empty */
+            board[row][col] = CELL_EMPTY;
+            was_piece = FALSE;
+        } else {
+            /* Current cell is a piece */
+            board[row][col] = piece;
+            was_piece = TRUE;
+        }
+    }
 }
 
 /* THE END -------------------------------------------------------------------*/

@@ -3,3 +3,5 @@
 
 CMakeFiles/COMP10002_ass2.dir/main.c.o: ../main.c
 
+CMakeFiles/COMP10002_ass2.dir/scratchpad_.c.o: ../scratchpad\ .c
+
