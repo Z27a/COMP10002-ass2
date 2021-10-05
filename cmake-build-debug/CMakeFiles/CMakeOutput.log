@@ -26,11 +26,11 @@ The C compiler identification is MSVC, found in "C:/Users/leoli/CLionProjects/CO
 Detecting C compiler ABI info compiled with the following output:
 Change Dir: C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug/CMakeFiles/CMakeTmp
 
-Run Build Command(s):nmake -f Makefile /nologo cmTC_ca111\fast && 	"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\HostX86\x86\nmake.exe"  -f CMakeFiles\cmTC_ca111.dir\build.make /nologo -L                  CMakeFiles\cmTC_ca111.dir\build
-Building C object CMakeFiles/cmTC_ca111.dir/CMakeCCompilerABI.c.obj
-	"C:\Program Files\JetBrains\CLion 2021.1.3\bin\cmake\win\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\cmTC_ca111.dir\CMakeCCompilerABI.c.obj.d --working-dir=C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug\CMakeFiles\CMakeTmp --filter-prefix="" -- C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\cl.exe @C:\Users\leoli\AppData\Local\Temp\nmE994.tmp
-Linking C executable cmTC_ca111.exe
-	"C:\Program Files\JetBrains\CLion 2021.1.3\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_ca111.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x86\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x86\mt.exe --manifests -- C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\link.exe /nologo @CMakeFiles\cmTC_ca111.dir\objects1.rsp @C:\Users\leoli\AppData\Local\Temp\nmE9E3.tmp
+Run Build Command(s):nmake -f Makefile /nologo cmTC_212f0\fast && 	"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\bin\HostX86\x86\nmake.exe"  -f CMakeFiles\cmTC_212f0.dir\build.make /nologo -L                  CMakeFiles\cmTC_212f0.dir\build
+Building C object CMakeFiles/cmTC_212f0.dir/CMakeCCompilerABI.c.obj
+	"C:\Program Files\JetBrains\CLion 2021.1.3\bin\cmake\win\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\cmTC_212f0.dir\CMakeCCompilerABI.c.obj.d --working-dir=C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug\CMakeFiles\CMakeTmp --filter-prefix="" -- C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\cl.exe @C:\Users\leoli\AppData\Local\Temp\nmD986.tmp
+Linking C executable cmTC_212f0.exe
+	"C:\Program Files\JetBrains\CLion 2021.1.3\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_212f0.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x86\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x86\mt.exe --manifests -- C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\link.exe /nologo @CMakeFiles\cmTC_212f0.dir\objects1.rsp @C:\Users\leoli\AppData\Local\Temp\nmD9D5.tmp
 
 
 

@@ -103,10 +103,16 @@ char lower(char c);
 
 int is_upper(char c);
 
-int legal_action(board_t *board, coord_t *from, coord_t *to, char from_piece);
+int legal_action(board_t *board, move_t *move, char from_piece);
 
 int valid_move(int dir, coord_t *dist, char from_colour, char cap_colour,
                int is_tower);
+
+coord_t get_dist(move_t *move);
+
+void update_board(board_t *board, move_t *move);
+
+//int get_cost(board_t *board);
 
 coord_t diag(coord_t from, int dist, int dir);
 
@@ -123,7 +129,7 @@ main(int argc, char *argv[]) {
     // YOUR IMPLEMENTATION OF STAGES 0-2
     board_t board;
 
-    do_stage0(board);
+    do_stage0(&board);
 
 
     return EXIT_SUCCESS;            // exit program with the success code
@@ -247,6 +253,7 @@ int prt_from_input(board_t *board) {
     char c1, c2, c3, c4, turn;
     move_t move;
     int first_turn = TRUE;
+    int cost;
 
     while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) != EOF) {
         /* Determine the initial value of turn (inverse of first player) */
@@ -268,8 +275,11 @@ int prt_from_input(board_t *board) {
         /* Check if move is valid */
         move_valid(board, &move, turn);
         /* Update board */
-
+        update_board(board, &move);
+        /* Get cost */
+        //cost = get_cost(board);
         /* Print board */
+        prt_board(board);
 
         /* Update turn */
         if (turn == 'w') {
@@ -308,7 +318,7 @@ void move_valid(board_t *board, move_t *move, char prev_turn) {
     /* 4 Target cell is not empty. */
     if (!cell_empty(board, &(move->to))) {
         //printf("%d %d %d %d", move->from.row, move->from.col, move->to.row, move->to.col);
-        //printf("4 ERROR: Target cell is not empty.\n");
+        printf("4 ERROR: Target cell is not empty.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -319,7 +329,7 @@ void move_valid(board_t *board, move_t *move, char prev_turn) {
     }
 
     /* 6 Illegal action. */
-    if (!legal_action(board, &(move->from), &(move->to), from_piece)) {
+    if (!legal_action(board, move, from_piece)) {
         printf("6 ERROR: Illegal action.\n");
         exit(EXIT_FAILURE);
     }
@@ -338,7 +348,7 @@ int outside_board(coord_t *coord) {
 /* Checks if a cell is empty */
 int cell_empty(board_t *board, coord_t *coord) {
     if (*board[coord->row][coord->col] == CELL_EMPTY) {
-        //printf("here, %d %d, board: '%c'\n", coord->row, coord->col, *board[coord->row][coord->col]);
+        printf("here, %d %d, board: '%c'\n", coord->row, coord->col, *board[coord->row][coord->col]);
         return TRUE;
     }
     return FALSE;
@@ -368,15 +378,16 @@ int is_upper(char c) {
 }
 
 /* Checks if an action is legal */
-int legal_action(board_t *board, coord_t *from, coord_t *to, char from_piece) {
+int legal_action(board_t *board, move_t *move, char from_piece) {
+    //coord_t to = move->to, from = move->from;
+
     char from_colour = lower(from_piece);
 
-    coord_t dist;
-    dist.row = to->row - from->row;
-    dist.col = to->col - from->col;
+    coord_t dist = get_dist(move);
 
-    char cap_colour = lower(*board[from->row + dist.row / 2][from->col +
-                                                             dist.col / 2]);
+    char cap_colour = lower(
+            *board[move->from.row + dist.row / 2][move->from.col +
+                                                  dist.col / 2]);
 
     if (from_colour == 'w') {
         return valid_move(+1, &dist, from_colour, cap_colour,
@@ -418,6 +429,43 @@ int valid_move(int dir, coord_t *dist, char from_colour, char cap_colour,
     return 0;
 }
 
+/* Gets the distance between two cells */
+coord_t get_dist(move_t *move) {
+    coord_t dist;
+    dist.row = move->to.row - move->from.row;
+    dist.col = move->to.col - move->from.col;
+    return dist;
+}
+
+/* Updates the board after a move has taken place */
+void update_board(board_t *board, move_t *move) {
+    coord_t dist = get_dist(move);
+
+    /* To cell takes value of from cell */
+    *board[move->to.row][move->to.col] = *board[move->from.row][move->from.col];
+    /* Set from cell to empty */
+    *board[move->from.row][move->from.col] = CELL_EMPTY;
+    printf("at update board: %d %d %d %d\n", move->from.row, move->from.col, move->to.row, move->to.col);
+    printf("dist?? %d %d\n", dist.row, dist.col);
+    if (abs(dist.row) > 1) {
+        /* Make captured cell empty */
+        *board[move->from.row + dist.row / 2][move->from.col +
+                                              dist.col / 2] = CELL_EMPTY;
+        printf("captured altered\n");
+    }
+}
+
+//int get_cost(board_t *board) {
+//    int cost;
+//
+//    for (int row = 0; row < BOARD_SIZE; row++) {
+//        for (int col = 0; col < BOARD_SIZE; col++) {
+//            if (*board[row][col] == CELL_EMPTY) {
+//                break;
+//            }
+//        }
+//    }
+//}
 
 /* Returns a coordinate diagonal to the one specified. dir from 1 to 4 is
  * top left, top right, bottom left, bottom right respectively. Doesn't check
