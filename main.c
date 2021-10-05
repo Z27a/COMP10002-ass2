@@ -253,7 +253,7 @@ int prt_from_input(board_t *board) {
     char c1, c2, c3, c4, turn;
     move_t move;
     int first_turn = TRUE;
-    int cost;
+    int cost, num_turns = 1;
 
     while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) != EOF) {
         /* Determine the initial value of turn (inverse of first player) */
@@ -280,15 +280,19 @@ int prt_from_input(board_t *board) {
         cost = get_cost(board);
         /* Print board */
         printf("=====================================\n");
+        /* Update turn */
+        if (turn == CELL_WPIECE) {
+            turn = CELL_BPIECE;
+            printf("BLACK ACTION ");
+        } else {
+            printf("WHITE ACTION ");
+            turn = CELL_WPIECE;
+        }
+        printf("#%d: %c%c-%c%c\n", num_turns, c1, c2, c3, c4);
         printf("BOARD COST: %d\n", cost);
         prt_board(board);
 
-        /* Update turn */
-        if (turn == CELL_WPIECE) {
-            turn = 'b';
-        } else {
-            turn = CELL_WPIECE;
-        }
+        num_turns++;
     }
     return 0;
 }
@@ -453,7 +457,6 @@ void update_board(board_t *board, move_t *move) {
         /* Make captured cell empty */
         *board[move->from.row + dist.row / 2][move->from.col +
                                               dist.col / 2] = CELL_EMPTY;
-        printf("captured altered\n");
     }
 }
 
@@ -465,13 +468,13 @@ int get_cost(board_t *board) {
             if (*board[row][col] == CELL_EMPTY) {
                 continue;
             } else if (*board[row][col] == CELL_WPIECE) {
-                cost--;
+                cost -= COST_PIECE;
             } else if (*board[row][col] == CELL_BPIECE) {
-                cost++;
+                cost += COST_PIECE;
             } else if (*board[row][col] == CELL_WTOWER) {
-                cost -= 3;
+                cost -= COST_TOWER;
             } else {
-                cost += 3;
+                cost += COST_TOWER;
             }
         }
     }
