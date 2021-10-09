@@ -142,6 +142,54 @@ main.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\main.c.s
 .PHONY : main.c.s
 
+stage0.obj: stage0.c.obj
+.PHONY : stage0.obj
+
+# target to build an object file
+stage0.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage0.c.obj
+.PHONY : stage0.c.obj
+
+stage0.i: stage0.c.i
+.PHONY : stage0.i
+
+# target to preprocess a source file
+stage0.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage0.c.i
+.PHONY : stage0.c.i
+
+stage0.s: stage0.c.s
+.PHONY : stage0.s
+
+# target to generate assembly for a file
+stage0.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage0.c.s
+.PHONY : stage0.c.s
+
+stage1.obj: stage1.c.obj
+.PHONY : stage1.obj
+
+# target to build an object file
+stage1.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage1.c.obj
+.PHONY : stage1.c.obj
+
+stage1.i: stage1.c.i
+.PHONY : stage1.i
+
+# target to preprocess a source file
+stage1.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage1.c.i
+.PHONY : stage1.c.i
+
+stage1.s: stage1.c.s
+.PHONY : stage1.s
+
+# target to generate assembly for a file
+stage1.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage1.c.s
+.PHONY : stage1.c.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -154,6 +202,12 @@ help:
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
+	@echo ... stage0.obj
+	@echo ... stage0.i
+	@echo ... stage0.s
+	@echo ... stage1.obj
+	@echo ... stage1.i
+	@echo ... stage1.s
 .PHONY : help
 
 

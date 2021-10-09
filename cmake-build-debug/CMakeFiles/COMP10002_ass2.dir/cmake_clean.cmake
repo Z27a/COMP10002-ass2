@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/COMP10002_ass2.dir/main.c.obj"
+  "CMakeFiles/COMP10002_ass2.dir/stage0.c.obj"
+  "CMakeFiles/COMP10002_ass2.dir/stage1.c.obj"
   "COMP10002_ass2.exe"
   "COMP10002_ass2.exe.manifest"
   "COMP10002_ass2.lib"
