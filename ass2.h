@@ -63,10 +63,10 @@ typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 #define TRUE 1
 #define FALSE 0
 #define NUM_PIECES (int) (ROWS_WITH_PIECES*BOARD_SIZE*0.5)
-
 // TODO: make row sep dynamic?
 #define ROW_SEP "+---+---+---+---+---+---+---+---+"
 #define COL_SEP "|"
+#define MAX_MOVES 8
 
 /* typedefs ------------------------------------------------------------------*/
 typedef struct {
@@ -84,16 +84,31 @@ typedef struct {
     char turn;
 } next_action_t;
 
+typedef struct list_elem list_elem_t;
 typedef struct node node_t;
 
+struct list_elem {
+    node_t *data;
+    list_elem_t *next;
+};
+
+typedef struct {
+    list_elem_t *head;
+    list_elem_t *foot;
+} list_t;
+
 struct node {
-    board_t board;
+    board_t *board;
     int cost;
     move_t move;
     char turn;
     node_t *parent;
-    node_t *cdrn[TREE_DEPTH];
+    list_t *child_handle;
 };
+
+typedef struct {
+    move_t moves[MAX_MOVES];
+} moves_t;
 
 
 /* function prototypes -------------------------------------------------------*/
@@ -101,7 +116,15 @@ next_action_t do_stage0(board_t board);
 
 void do_stage1(board_t board, char turn);
 
-node_t *build_tree(node_t *node, int depth);
+void build_tree(node_t *parent, int depth);
+
+char switch_colour(char orig);
+
+void move_cpy(move_t *orig, move_t *new);
+
+node_t *new_child(board_t prev_board, move_t *move, char prev_turn);
+
+list_t *insert_child(list_t *handle, node_t *data);
 
 void board_cpy(board_t orig, board_t new);
 
@@ -115,7 +138,7 @@ void prt_board(board_t board);
 
 next_action_t prt_from_input(board_t board);
 
-void move_valid(board_t board, move_t *move, char prev_turn);
+int move_valid(board_t board, move_t *move, char prev_turn, int stage1);
 
 int outside_board(coord_t *coord);
 
@@ -140,7 +163,7 @@ void update_board(board_t board, move_t *move);
 
 int get_cost(board_t board);
 
-coord_t diag(coord_t from, int dist, int dir);
+moves_t get_moves(int row, int col);
 
 int same_coord(coord_t *coord1, coord_t *coord2, coord_t *c_tested);
 

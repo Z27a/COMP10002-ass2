@@ -138,7 +138,7 @@ next_action_t prt_from_input(board_t board) {
         move.to.row = c4 - '0' - 1;
 
         /* Check if move is valid */
-        move_valid(board, &move, turn);
+        move_valid(board, &move, turn, FALSE);
         /* Update board */
         update_board(board, &move);
         /* Get cost */
@@ -175,30 +175,34 @@ next_action_t prt_from_input(board_t board) {
 
 
 /* Checks if a move is valid */
-void move_valid(board_t board, move_t *move, char prev_turn) {
+int move_valid(board_t board, move_t *move, char prev_turn, int stage1) {
     char from_piece = board[move->from.row][move->from.col];
 
     /* 1 Source cell is outside of the board. */
     if (outside_board(&(move->from))) {
         //TODO: need to #define these errors?
+        if (stage1) return 0;
         printf("ERROR: Source cell is outside of the board.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 2 Target cell is outside of the board. */
     if (outside_board(&(move->to))) {
+        if (stage1) return 0;
         printf("ERROR: Target cell is outside of the board.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 3 Source cell is empty. */
     if (cell_empty(board, &(move->from))) {
+        if (stage1) return 0;
         printf("ERROR: Source cell is empty.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 4 Target cell is not empty. */
     if (!cell_empty(board, &(move->to))) {
+        if (stage1) return 0;
         //printf("%d %d %d %d", move->from.row, move->from.col, move->to.row, move->to.col);
         printf("ERROR: Target cell is not empty.\n");
         exit(EXIT_FAILURE);
@@ -206,16 +210,18 @@ void move_valid(board_t board, move_t *move, char prev_turn) {
 
     /* 5 Source cell holds opponent’s piece/tower. */
     if (same_colour(prev_turn, from_piece)) {
+        if (stage1) return 0;
         printf("ERROR: Source cell holds opponent's piece/tower.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 6 Illegal action. */
     if (!legal_action(board, move, from_piece)) {
+        if (stage1) return 0;
         printf("ERROR: Illegal action.\n");
         exit(EXIT_FAILURE);
     }
-
+    return 1;
 }
 
 /* Checks if a coordinate lies outside the board */
@@ -375,9 +381,6 @@ int get_cost(board_t board) {
     return cost;
 }
 
-void do_stage2(board_t board) {
-    printf("stage 2");
-}
 
 
 /* Adds padding to output */
