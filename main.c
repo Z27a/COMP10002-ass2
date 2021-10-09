@@ -62,7 +62,7 @@ typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 /* #defines ------------------------------------------------------------------*/
 #define TRUE 1
 #define FALSE 0
-#define NUM_PIECES (ROWS_WITH_PIECES*BOARD_SIZE)
+#define NUM_PIECES (int) (ROWS_WITH_PIECES*BOARD_SIZE*0.5)
 
 // TODO: make row sep dynamic?
 #define ROW_SEP "+---+---+---+---+---+---+---+---+"
@@ -79,23 +79,33 @@ typedef struct {
     coord_t to;
 } move_t;
 
+/*
+ * minimax tree should have:
+ * array of node pointers pointing to the next nodes down the tree
+ * store the board at that point
+ * score of board at that point
+ * array of actions that led to that point
+ * player
+ * best action
+ * node pointer to parent node
+ */
 
 /* function prototypes -------------------------------------------------------*/
-void do_stage0(board_t *board);
+void do_stage0(board_t board);
 
-void init_board(board_t *board);
+void init_board(board_t board);
 
-void fill_pieces(int row_even, int row, board_t *board, char piece);
+void fill_pieces(int row_even, int row, board_t board, char piece);
 
-void prt_board(board_t *board);
+void prt_board(board_t board);
 
-int prt_from_input(board_t *board);
+int prt_from_input(board_t board);
 
-void move_valid(board_t *board, move_t *move, char prev_turn);
+void move_valid(board_t board, move_t *move, char prev_turn);
 
 int outside_board(coord_t *coord);
 
-int cell_empty(board_t *board, coord_t *coord);
+int cell_empty(board_t board, coord_t *coord);
 
 int same_colour(char c1, char c2);
 
@@ -103,16 +113,16 @@ char lower(char c);
 
 int is_upper(char c);
 
-int legal_action(board_t *board, move_t *move, char from_piece);
+int legal_action(board_t board, move_t *move, char from_piece);
 
 int valid_move(int dir, coord_t *dist, char from_colour, char cap_colour,
                int is_tower);
 
 coord_t get_dist(move_t *move);
 
-void update_board(board_t *board, move_t *move);
+void update_board(board_t board, move_t *move);
 
-int get_cost(board_t *board);
+int get_cost(board_t board);
 
 coord_t diag(coord_t from, int dist, int dir);
 
@@ -129,7 +139,7 @@ main(int argc, char *argv[]) {
     // YOUR IMPLEMENTATION OF STAGES 0-2
     board_t board;
 
-    do_stage0(&board);
+    do_stage0(board);
 
 
     return EXIT_SUCCESS;            // exit program with the success code
@@ -137,14 +147,14 @@ main(int argc, char *argv[]) {
 
 
 /* Stage 0 */
-void do_stage0(board_t *board) {
+void do_stage0(board_t board) {
     int instruction;
 
     init_board(board);
 
     /* Print initial board config and info */
     printf("BOARD SIZE: %dx%d\n", BOARD_SIZE, BOARD_SIZE);
-    printf("#BLACK PIECES: %d\n", NUM_PIECES);
+    printf("#BLACK PIECES: %d\n", NUM_PIECES); //TODO: #define these strings. Also use preincrement for off by one situations?
     printf("#WHITE PIECES: %d\n", NUM_PIECES);
     prt_board(board);
 
@@ -157,7 +167,7 @@ void do_stage0(board_t *board) {
 
 
 /* Loads the initial configuration into the board */
-void init_board(board_t *board) {
+void init_board(board_t board) {
     /* Assumes that the top left cell is always white and white pieces go
      * on the top of tbe board */
 
@@ -171,7 +181,7 @@ void init_board(board_t *board) {
     /* Middle rows with no pieces */
     for (mid = top; mid < BOARD_SIZE - ROWS_WITH_PIECES; mid++) {
         for (int cell = 0; cell < BOARD_SIZE; cell++) {
-            *board[mid][cell] = CELL_EMPTY;
+            board[mid][cell] = CELL_EMPTY;
         }
     }
     /* Bottom rows with black pieces */
@@ -182,7 +192,7 @@ void init_board(board_t *board) {
 
 
 /* Fills in a row that contains pieces */
-void fill_pieces(int row_even, int row, board_t *board, char piece) {
+void fill_pieces(int row_even, int row, board_t board, char piece) {
     int was_piece;
 
     if (row_even) {
@@ -196,11 +206,11 @@ void fill_pieces(int row_even, int row, board_t *board, char piece) {
     for (int col = 0; col < BOARD_SIZE; col++) {
         if (was_piece) {
             /* Current cell is empty */
-            *board[row][col] = CELL_EMPTY;
+            board[row][col] = CELL_EMPTY;
             was_piece = FALSE;
         } else {
             /* Current cell is a piece */
-            *board[row][col] = piece;
+            board[row][col] = piece;
             was_piece = TRUE;
         }
     }
@@ -208,7 +218,7 @@ void fill_pieces(int row_even, int row, board_t *board, char piece) {
 
 
 /* Prints the board with formatting */
-void prt_board(board_t *board) {
+void prt_board(board_t board) {
     /* Column letters */
     pad();
     for (int col = 0; col < BOARD_SIZE; col++) {
@@ -232,7 +242,7 @@ void prt_board(board_t *board) {
 
         /* Board contents */
         for (int col = 0; col < BOARD_SIZE; col++) {
-            printf("%s %c ", COL_SEP, *board[row][col]);
+            printf("%s %c ", COL_SEP, board[row][col]);
             if (col + 1 == BOARD_SIZE) {
                 printf("%s", COL_SEP);
                 newline();
@@ -249,16 +259,18 @@ void prt_board(board_t *board) {
 
 /* Read moves and prints out the state of the board after each move. Prints
  * error messages if a move is invalid */
-int prt_from_input(board_t *board) {
+int prt_from_input(board_t board) {
     char c1, c2, c3, c4, turn;
     move_t move;
     int first_turn = TRUE;
     int cost, num_turns = 1;
+    int x;
 
-    while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) != EOF) {
+    while ((x = scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4)) != EOF &&
+        x != 'A' && x != 'P') {
         /* Determine the initial value of turn (inverse of first player) */
         if (first_turn) {
-            if (same_colour(*board[c1 - 'A'][c2 - '0'], CELL_WPIECE)) {
+            if (same_colour(board[c1 - 'A'][c2 - '0'], CELL_WPIECE)) {
                 turn = 'b';
             } else {
                 turn = CELL_WPIECE;
@@ -299,44 +311,44 @@ int prt_from_input(board_t *board) {
 
 
 /* Checks if a move is valid */
-void move_valid(board_t *board, move_t *move, char prev_turn) {
-    char from_piece = *board[move->from.row][move->from.col];
+void move_valid(board_t board, move_t *move, char prev_turn) {
+    char from_piece = board[move->from.row][move->from.col];
 
     /* 1 Source cell is outside of the board. */
     if (outside_board(&(move->from))) {
         //TODO: need to #define these errors?
-        printf("1 ERROR: Source cell is outside of the board.\n");
+        printf("ERROR: Source cell is outside of the board.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 2 Target cell is outside of the board. */
     if (outside_board(&(move->to))) {
-        printf("2 ERROR: Target cell is outside of the board.\n");
+        printf("ERROR: Target cell is outside of the board.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 3 Source cell is empty. */
     if (cell_empty(board, &(move->from))) {
-        printf("3 ERROR: Source cell is empty.\n");
+        printf("ERROR: Source cell is empty.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 4 Target cell is not empty. */
     if (!cell_empty(board, &(move->to))) {
         //printf("%d %d %d %d", move->from.row, move->from.col, move->to.row, move->to.col);
-        printf("4 ERROR: Target cell is not empty.\n");
+        printf("ERROR: Target cell is not empty.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 5 Source cell holds opponent’s piece/tower. */
     if (same_colour(prev_turn, from_piece)) {
-        printf("5 ERROR: Source cell holds opponent's piece/tower.\n");
+        printf("ERROR: Source cell holds opponent's piece/tower.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 6 Illegal action. */
     if (!legal_action(board, move, from_piece)) {
-        printf("6 ERROR: Illegal action.\n");
+        printf("ERROR: Illegal action.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -352,9 +364,9 @@ int outside_board(coord_t *coord) {
 }
 
 /* Checks if a cell is empty */
-int cell_empty(board_t *board, coord_t *coord) {
-    if (*board[coord->row][coord->col] == CELL_EMPTY) {
-        //printf("here, %d %d, board: '%c'\n", coord->row, coord->col, *board[coord->row][coord->col]);
+int cell_empty(board_t board, coord_t *coord) {
+    if (board[coord->row][coord->col] == CELL_EMPTY) {
+        //printf("here, %d %d, board: '%c'\n", coord->row, coord->col, board[coord->row][coord->col]);
         return TRUE;
     }
     return FALSE;
@@ -384,7 +396,7 @@ int is_upper(char c) {
 }
 
 /* Checks if an action is legal */
-int legal_action(board_t *board, move_t *move, char from_piece) {
+int legal_action(board_t board, move_t *move, char from_piece) {
     //coord_t to = move->to, from = move->from;
 
     char from_colour = lower(from_piece);
@@ -392,7 +404,7 @@ int legal_action(board_t *board, move_t *move, char from_piece) {
     coord_t dist = get_dist(move);
 
     char cap_colour = lower(
-            *board[move->from.row + dist.row / 2][move->from.col +
+            board[move->from.row + dist.row / 2][move->from.col +
                                                   dist.col / 2]);
 
     if (from_colour == CELL_WPIECE) {
@@ -444,34 +456,35 @@ coord_t get_dist(move_t *move) {
 }
 
 /* Updates the board after a move has taken place */
-void update_board(board_t *board, move_t *move) {
+void update_board(board_t board, move_t *move) {
     coord_t dist = get_dist(move);
+    //TODO: check for pieces becoming towers
 
     /* To cell takes value of from cell */
-    *board[move->to.row][move->to.col] = *board[move->from.row][move->from.col];
+    board[move->to.row][move->to.col] = board[move->from.row][move->from.col];
     /* Set from cell to empty */
-    *board[move->from.row][move->from.col] = CELL_EMPTY;
+    board[move->from.row][move->from.col] = CELL_EMPTY;
     //printf("at update board: %d %d %d %d\n", move->from.row, move->from.col, move->to.row, move->to.col);
     //printf("dist?? %d %d\n", dist.row, dist.col);
     if (abs(dist.row) > 1) {
         /* Make captured cell empty */
-        *board[move->from.row + dist.row / 2][move->from.col +
+        board[move->from.row + dist.row / 2][move->from.col +
                                               dist.col / 2] = CELL_EMPTY;
     }
 }
 
-int get_cost(board_t *board) {
+int get_cost(board_t board) {
     int cost = 0;
 
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
-            if (*board[row][col] == CELL_EMPTY) {
+            if (board[row][col] == CELL_EMPTY) {
                 continue;
-            } else if (*board[row][col] == CELL_WPIECE) {
+            } else if (board[row][col] == CELL_WPIECE) {
                 cost -= COST_PIECE;
-            } else if (*board[row][col] == CELL_BPIECE) {
+            } else if (board[row][col] == CELL_BPIECE) {
                 cost += COST_PIECE;
-            } else if (*board[row][col] == CELL_WTOWER) {
+            } else if (board[row][col] == CELL_WTOWER) {
                 cost -= COST_TOWER;
             } else {
                 cost += COST_TOWER;
