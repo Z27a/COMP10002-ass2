@@ -91,7 +91,11 @@ typedef struct {
  */
 
 /* function prototypes -------------------------------------------------------*/
-void do_stage0(board_t board);
+int do_stage0(board_t board);
+
+void do_stage1(board_t board);
+
+void do_stage2(board_t board);
 
 void init_board(board_t board);
 
@@ -110,6 +114,8 @@ int cell_empty(board_t board, coord_t *coord);
 int same_colour(char c1, char c2);
 
 char lower(char c);
+
+char upper(char c);
 
 int is_upper(char c);
 
@@ -138,8 +144,17 @@ main(int argc, char *argv[]) {
 
     // YOUR IMPLEMENTATION OF STAGES 0-2
     board_t board;
+    int next;
 
-    do_stage0(board);
+    next = do_stage0(board);
+
+    if (next == 1) {
+        do_stage1(board);
+    } else if (next == 2) {
+        do_stage2(board);
+    } else {
+        // check for winner?
+    }
 
 
     return EXIT_SUCCESS;            // exit program with the success code
@@ -147,22 +162,20 @@ main(int argc, char *argv[]) {
 
 
 /* Stage 0 */
-void do_stage0(board_t board) {
-    int instruction;
+int do_stage0(board_t board) {
 
     init_board(board);
 
     /* Print initial board config and info */
     printf("BOARD SIZE: %dx%d\n", BOARD_SIZE, BOARD_SIZE);
-    printf("#BLACK PIECES: %d\n", NUM_PIECES); //TODO: #define these strings. Also use preincrement for off by one situations?
+    printf("#BLACK PIECES: %d\n",
+           NUM_PIECES); //TODO: #define these strings. Also use preincrement for off by one situations?
     printf("#WHITE PIECES: %d\n", NUM_PIECES);
     prt_board(board);
 
     /* Read input and print out changes to board. Print errors if input is not
      * valid */
-    //instruction = prt_from_input(board);
-    prt_from_input(board);
-    // Need to check if a player wins every time?
+    return prt_from_input(board);
 }
 
 
@@ -267,7 +280,7 @@ int prt_from_input(board_t board) {
     int x;
 
     while ((x = scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4)) != EOF &&
-        x != 'A' && x != 'P') {
+           x != 'A' && x != 'P') {
         /* Determine the initial value of turn (inverse of first player) */
         if (first_turn) {
             if (same_colour(board[c1 - 'A'][c2 - '0'], CELL_WPIECE)) {
@@ -306,7 +319,16 @@ int prt_from_input(board_t board) {
 
         num_turns++;
     }
+    if (x != EOF) {
+        if (x == 'A') {
+            return 1;
+        }
+        /* x = 'P' */
+        return 2;
+    }
+    /* No extra commands */
     return 0;
+    // Need to check if a player wins every time?
 }
 
 
@@ -387,6 +409,14 @@ char lower(char c) {
     return c;
 }
 
+/* Return the uppercase version of letters */
+char upper(char c) {
+    if (!is_upper(c)) {
+        return (c - 32);
+    }
+    return c;
+}
+
 /* Checks if a char is upper case */
 int is_upper(char c) {
     if ('A' <= c && c <= 'Z') {
@@ -405,7 +435,7 @@ int legal_action(board_t board, move_t *move, char from_piece) {
 
     char cap_colour = lower(
             board[move->from.row + dist.row / 2][move->from.col +
-                                                  dist.col / 2]);
+                                                 dist.col / 2]);
 
     if (from_colour == CELL_WPIECE) {
         return valid_move(+1, &dist, from_colour, cap_colour,
@@ -458,18 +488,25 @@ coord_t get_dist(move_t *move) {
 /* Updates the board after a move has taken place */
 void update_board(board_t board, move_t *move) {
     coord_t dist = get_dist(move);
-    //TODO: check for pieces becoming towers
+    char moved_piece = board[move->from.row][move->from.col];
 
-    /* To cell takes value of from cell */
-    board[move->to.row][move->to.col] = board[move->from.row][move->from.col];
-    /* Set from cell to empty */
+    /* 'To' cell takes value of 'from' cell */
+    if ((move->to.row == BOARD_SIZE || move->to.row == 0) && !is_upper(moved_piece)) {
+        /* Normal piece becomes a tower piece */
+        board[move->to.row][move->to.col] = upper(board[move->from.row][move->from.col]);
+    } else {
+        /* Still a normal piece */
+        board[move->to.row][move->to.col] = board[move->from.row][move->from.col];
+    }
+
+    /* Set 'from' cell to empty */
     board[move->from.row][move->from.col] = CELL_EMPTY;
     //printf("at update board: %d %d %d %d\n", move->from.row, move->from.col, move->to.row, move->to.col);
     //printf("dist?? %d %d\n", dist.row, dist.col);
     if (abs(dist.row) > 1) {
         /* Make captured cell empty */
         board[move->from.row + dist.row / 2][move->from.col +
-                                              dist.col / 2] = CELL_EMPTY;
+                                             dist.col / 2] = CELL_EMPTY;
     }
 }
 
@@ -527,6 +564,15 @@ int same_coord(coord_t *coord1, coord_t *coord2, coord_t *c_tested) {
     }
     return 0;
 }
+
+void do_stage1(board_t board) {
+    printf("stage 1");
+}
+
+void do_stage2(board_t board) {
+    printf("stage 2");
+}
+
 
 /* Adds padding to output */
 void pad() {
