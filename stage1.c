@@ -2,53 +2,38 @@
 
 /* Stage 1 */
 void do_stage1(board_t board, char turn) {
-    printf("stage 1");
+    printf("stage 1\n");
     /* initialise root */
-    node_t *root;
-    board_t *new_board;
-    root = (node_t *) malloc(sizeof(node_t));
-    new_board = (board_t *) malloc(sizeof(board_t));
-    assert(root != NULL && new_board != NULL); //TODO: remember to have assertions. Disclose I used alistair's programs?
-    root->board = new_board;
-    board_cpy(board, *root->board);
-    root->cost = get_cost(board);
-    root->turn = turn;
-    root->parent = NULL;
-    list_t *handle;
-    handle = (list_t *) malloc(sizeof(list_t));
-    handle->head = handle->foot = NULL;
-    root->child_handle = handle;
-
+    state_t *root;
+    root = init_root(board, turn);
     // calculate possible moves and loop through them to run build tree
-
     build_tree(root, 1);
-
-
 }
 
 
-void build_tree(node_t *parent, int depth) {
+void build_tree(state_t *parent, int depth) {
     if (depth > TREE_DEPTH) {
-        /* Base case ff*/
-        parent->child_handle = NULL;
+        /* Base case */
+        return;
     } else {
         char prev_turn = switch_colour(parent->turn);
-        node_t *new;
-        moves_t moves;
-        // get diags and then spam move_valid !!! :))))
+        state_t *new;
+        move_ary psbl_mvs;
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
-                if (lower(*parent->board[row][col]) == parent->turn) {
-                    /* Get possible moves */
-                    moves = get_moves(row, col);
+                if (lower(parent->board[row][col]) == parent->turn) {
+                    /* Get possible psbl_mvs */
+                    psbl_mvs = get_moves(row, col);
                     for (int i = 0; i < MAX_MOVES; i++) {
-                        if (move_valid(*parent->board, &moves.moves[i], prev_turn, TRUE)) {
-                            // malloc new node, update data
-                            new = new_child(*parent->board, &parent->move, parent->turn);
+                        if (move_valid(parent->board, &psbl_mvs.moves[i], prev_turn,
+                                       TRUE)) {
+                            // malloc new state, update state
+                            new = new_child(parent->board, &psbl_mvs.moves[i],
+                                            parent->turn);
                             // insert into child handle list
-                            parent->child_handle = insert_child(parent->child_handle, new);
+                            insert_child(parent->child_handle, new);
                             // run recursive function on that head
-                            build_tree(parent->child_handle->foot->data, ++depth);
+                            build_tree(parent->child_handle->foot->state, ++depth);
                         }
                     }
                 }
@@ -57,33 +42,54 @@ void build_tree(node_t *parent, int depth) {
     }
 }
 
-node_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
-    node_t *new;
-    board_t *new_board;
-    new = (node_t *) malloc(sizeof(node_t));
-    new_board = (board_t *) malloc(sizeof(board_t));
-    assert(new != NULL && new_board != NULL);
-    new->board = new_board;
-    board_cpy(prev_board, *new->board);
-    update_board(*new->board, move);
-    new->cost = get_cost(*new->board);
+state_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
+    state_t *new;
+    new = (state_t *) malloc(sizeof(state_t));
+    assert(new != NULL);
+    board_cpy(prev_board, new->board);
+    update_board(new->board, move);
+    new->cost = get_cost(new->board);
     move_cpy(move, &new->move);
     new->turn = switch_colour(prev_turn);
+    new->child_handle = new_handle();
     return new;
 }
 
-list_t *insert_child(list_t *handle, node_t *data) {
+void insert_child(list_t *handle, state_t *data) {
     assert(handle != NULL);
-
-    list_elem_t *new;
-    new = (list_elem_t *) malloc(sizeof(list_elem_t));
+    lst_node_t *new;
+    new = (lst_node_t *) malloc(sizeof(lst_node_t));
     assert(new != NULL);
     new->next = NULL;
-    new->data = data;
+    new->state = data;
 
-    if (handle->foot==NULL) {
+    if (handle->foot == NULL) {
+        /* First insertion */
+        handle->head = handle->foot = new;
+    } else {
+        handle->foot->next = new;
         handle->foot = new;
     }
+}
+
+state_t *init_root(board_t board, char turn) {
+    state_t *root;
+    root = (state_t *) malloc(sizeof(state_t));
+    assert(root != NULL);
+    //TODO: remember to have assertions. Disclose I used alistair's programs?
+    board_cpy(board, root->board);
+    root->cost = get_cost(board);
+    root->turn = turn;
+    root->parent = NULL;
+    root->child_handle = new_handle();
+    return root;
+}
+
+list_t *new_handle() {
+    list_t *handle;
+    handle = (list_t *) malloc(sizeof(list_t));
+    assert(handle!=NULL);
+    handle->head = handle->foot = NULL;
     return handle;
 }
 
@@ -111,39 +117,31 @@ char switch_colour(char orig) {
     return new;
 }
 
-/* Returns a coordinate diagonal to the one specified. dir from 1 to 4 is
- * top left, top right, bottom left, bottom right respectively. Doesn't check
- * if returned coord is outside the board. */
-moves_t get_moves(int row, int col) {
-    moves_t moves;
+move_ary get_moves(int row, int col) {
+    move_ary new;
+    for (int i = 0; i < MAX_MOVES; i++) {
+        new.moves[i].from.row = row;
+        new.moves[i].from.col = col;
+    }
     for (int i = 0; i < 2; i++) {
         /* NE */
-        moves.moves[0 + i].to.row = row - (i + 1);
-        moves.moves[0 + i].to.col = col + (i + 1);
+        new.moves[0 + i].to.row = row - (i + 1);
+        new.moves[0 + i].to.col = col + (i + 1);
     }
     for (int i = 0; i < 2; i++) {
         /* SE */
-        moves.moves[2 + i].to.row = row + (i + 1);
-        moves.moves[2 + i].to.col = col + (i + 1);
+        new.moves[2 + i].to.row = row + (i + 1);
+        new.moves[2 + i].to.col = col + (i + 1);
     }
     for (int i = 0; i < 2; i++) {
         /* SW */
-        moves.moves[4 + i].to.row = row + (i + 1);
-        moves.moves[4 + i].to.col = col - (i + 1);
+        new.moves[4 + i].to.row = row + (i + 1);
+        new.moves[4 + i].to.col = col - (i + 1);
     }
     for (int i = 0; i < 2; i++) {
         /* NW */
-        moves.moves[6 + i].to.row = row - (i + 1);
-        moves.moves[6 + i].to.col = col - (i + 1);
+        new.moves[6 + i].to.row = row - (i + 1);
+        new.moves[6 + i].to.col = col - (i + 1);
     }
-    return moves;
-}
-
-/* Checks if two coordinates are the same */
-int same_coord(coord_t *coord1, coord_t *coord2, coord_t *c_tested) {
-    if (coord1->row == c_tested->row && coord1->col == c_tested->col ||
-        coord2->row == c_tested->row && coord2->col == c_tested->col) {
-        return 1;
-    }
-    return 0;
+    return new;
 }

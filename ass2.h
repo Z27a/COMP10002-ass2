@@ -80,35 +80,35 @@ typedef struct {
 } move_t;
 
 typedef struct {
+    move_t moves[MAX_MOVES];
+} move_ary;
+
+typedef struct {
     int action;
     char turn;
 } next_action_t;
 
-typedef struct list_elem list_elem_t;
-typedef struct node node_t;
+typedef struct lst_node lst_node_t;
+typedef struct state state_t;
 
-struct list_elem {
-    node_t *data;
-    list_elem_t *next;
+struct lst_node {
+    state_t *state;
+    lst_node_t *next;
 };
 
 typedef struct {
-    list_elem_t *head;
-    list_elem_t *foot;
+    lst_node_t *head;
+    lst_node_t *foot;
 } list_t;
 
-struct node {
-    board_t *board;
+struct state {
+    board_t board;
     int cost;
     move_t move;
     char turn;
-    node_t *parent;
+    state_t *parent;
     list_t *child_handle;
 };
-
-typedef struct {
-    move_t moves[MAX_MOVES];
-} moves_t;
 
 
 /* function prototypes -------------------------------------------------------*/
@@ -116,15 +116,19 @@ next_action_t do_stage0(board_t board);
 
 void do_stage1(board_t board, char turn);
 
-void build_tree(node_t *parent, int depth);
+void build_tree(state_t *parent, int depth);
 
 char switch_colour(char orig);
 
 void move_cpy(move_t *orig, move_t *new);
 
-node_t *new_child(board_t prev_board, move_t *move, char prev_turn);
+state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
 
-list_t *insert_child(list_t *handle, node_t *data);
+void insert_child(list_t *handle, state_t *data);
+
+state_t *init_root(board_t board, char turn);
+
+list_t *new_handle();
 
 void board_cpy(board_t orig, board_t new);
 
@@ -163,7 +167,7 @@ void update_board(board_t board, move_t *move);
 
 int get_cost(board_t board);
 
-moves_t get_moves(int row, int col);
+move_ary get_moves(int row, int col);
 
 int same_coord(coord_t *coord1, coord_t *coord2, coord_t *c_tested);
 
