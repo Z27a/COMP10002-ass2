@@ -111,7 +111,7 @@ void prt_board(board_t board) {
 }
 
 
-/* Read moves and prints out the state of the board after each move. Prints
+/* Read moves and prints out the data of the board after each move. Prints
  * error messages if a move is invalid */
 next_action_t prt_from_input(board_t board) {
     next_action_t next_action;
@@ -121,7 +121,7 @@ next_action_t prt_from_input(board_t board) {
     int cost, num_turns = 1;
 
     while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) == 4) {
-        /* Determine the initial value of turn (inverse of first player) */
+        /* Determine the initial value of cur_turn (inverse of first player) */
         if (first_turn) {
             if (same_colour(board[c1 - 'A'][c2 - '0'], CELL_WPIECE)) {
                 turn = 'b';
@@ -145,7 +145,7 @@ next_action_t prt_from_input(board_t board) {
         cost = get_cost(board);
         /* Print board */
         printf("=====================================\n");
-        /* Update turn */
+        /* Update cur_turn */
         if (turn == CELL_WPIECE) {
             turn = CELL_BPIECE;
             printf("BLACK ACTION ");
@@ -275,49 +275,44 @@ int is_upper(char c) {
 
 /* Checks if an action is legal */
 int legal_action(board_t board, move_t *move, char from_piece) {
-    //coord_t to = move->to, from = move->from;
-
-    char from_colour = lower(from_piece);
-
-    coord_t dist = get_dist(move);
-
-    char cap_colour = lower(
-            board[move->from.row + dist.row / 2][move->from.col +
-                                                 dist.col / 2]);
-
-    if (from_colour == CELL_WPIECE) {
-        return valid_move(+1, &dist, from_colour, cap_colour,
-                          lower(from_piece));
+    if (lower(from_piece) == CELL_WPIECE) {
+        return valid_move(+1, board, move, from_piece);
     }
-    return valid_move(-1, &dist, from_colour, cap_colour, lower(from_piece));
+    return valid_move(-1, board, move, from_piece);
 }
 
 
 /* Checks if a move is valid. Confusing with legal action existing and all huh
  * dir = +1 for white, -1 for black */
-int valid_move(int dir, coord_t *dist, char from_colour, char cap_colour,
-               int is_tower) {
-    if (dist->row == dir * 1 && (dist->col == 1 || dist->col == -1)) {
+int valid_move(int dir, board_t board, move_t *move, char from_piece) {
+    char from_colour = lower(from_piece);
+    coord_t dist = get_dist(move);
+    char cap_piece = lower(
+            board[move->from.row + dist.row / 2][move->from.col +
+                                                 dist.col / 2]);
+    if (dist.row == dir * 1 && (dist.col == 1 || dist.col == -1)) {
         /* Move is one cell diagonally down */
         return 1;
     }
-    if (dist->row == dir * 2 && (dist->col == 2 || dist->col == -2)) {
+    if (dist.row == dir * 2 && (dist.col == 2 || dist.col == -2)) {
         /* Move is two cells diagonally down */
-        if (!same_colour(from_colour, cap_colour)) {
-            /* Captured piece is the other player's */
+        if (cap_piece != CELL_EMPTY && !same_colour(from_colour, cap_piece)) {
+            /* Captured cell is not empty and captured piece is the other
+             * player's */
             return 1;
         }
     }
-    if (is_tower) {
+    if (is_upper(from_piece)) {
         /* Tower */
-        if (dist->row == -dir * 1 && (dist->col == 1 || dist->col == -1)) {
+        if (dist.row == -dir * 1 && (dist.col == 1 || dist.col == -1)) {
             /* Move is one cell diagonally up */
             return 1;
         }
-        if (dist->row == -dir * 2 && (dist->col == 2 || dist->col == -2)) {
+        if (dist.row == -dir * 2 && (dist.col == 2 || dist.col == -2)) {
             /* Move is two cells diagonally up */
-            if (!same_colour(from_colour, cap_colour)) {
-                /* Captured piece is the other player's */
+            if (cap_piece != CELL_EMPTY && !same_colour(from_colour, cap_piece)) {
+                /* Captured cell is not empty and captured piece is the other
+                 * player's */
                 return 1;
             }
         }

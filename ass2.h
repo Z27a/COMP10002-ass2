@@ -92,7 +92,7 @@ typedef struct lst_node lst_node_t;
 typedef struct state state_t;
 
 struct lst_node {
-    state_t *state;
+    state_t *data;
     lst_node_t *next;
 };
 
@@ -105,16 +105,22 @@ struct state {
     board_t board;
     int cost;
     move_t move;
-    char turn;
-    state_t *parent;
-    list_t *child_handle;
+    char cur_turn;
+    list_t *child_hdl;
+    int depth;
 };
+
+typedef struct {
+    int cost;
+    move_t move;
+    int depth;
+} cam_t;
 
 
 /* function prototypes -------------------------------------------------------*/
 next_action_t do_stage0(board_t board);
 
-void do_stage1(board_t board, char turn);
+void do_stage1(board_t board, char prev_turn);
 
 void build_tree(state_t *parent, int depth);
 
@@ -126,11 +132,15 @@ state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
 
 void insert_child(list_t *handle, state_t *data);
 
-state_t *init_root(board_t board, char turn);
+state_t *init_root(board_t board, char cur_turn);
 
 list_t *new_handle();
 
 void board_cpy(board_t orig, board_t new);
+
+cam_t backprop_cost(state_t *state, char order);
+
+void prt_move(move_t move);
 
 void do_stage2(board_t board);
 
@@ -158,8 +168,7 @@ int is_upper(char c);
 
 int legal_action(board_t board, move_t *move, char from_piece);
 
-int valid_move(int dir, coord_t *dist, char from_colour, char cap_colour,
-               int is_tower);
+int valid_move(int dir, board_t board, move_t *move, char from_piece);
 
 coord_t get_dist(move_t *move);
 
