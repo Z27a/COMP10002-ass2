@@ -16,7 +16,9 @@ main(int argc, char *argv[]) {
     if (next.action == 1) {
         do_stage1(board, &next);
     } else if (next.action == 2) {
-        do_stage2(board, &next);
+        for (int i = 0; i < 10; i++) {
+            do_stage1(board, &next);
+        }
     } else {
         /* check for winner */
     }

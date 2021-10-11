@@ -190,30 +190,6 @@ stage1.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage1.c.s
 .PHONY : stage1.c.s
 
-stage2.obj: stage2.c.obj
-.PHONY : stage2.obj
-
-# target to build an object file
-stage2.c.obj:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage2.c.obj
-.PHONY : stage2.c.obj
-
-stage2.i: stage2.c.i
-.PHONY : stage2.i
-
-# target to preprocess a source file
-stage2.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage2.c.i
-.PHONY : stage2.c.i
-
-stage2.s: stage2.c.s
-.PHONY : stage2.s
-
-# target to generate assembly for a file
-stage2.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage2.c.s
-.PHONY : stage2.c.s
-
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -232,9 +208,6 @@ help:
 	@echo ... stage1.obj
 	@echo ... stage1.i
 	@echo ... stage1.s
-	@echo ... stage2.obj
-	@echo ... stage2.i
-	@echo ... stage2.s
 .PHONY : help
 
 

@@ -186,5 +186,3 @@ cam_t backprop_cost(state_t *state, char order);
 void prt_move(move_t *move);
 
 void free_tree(state_t *parent);
-
-void do_stage2(board_t board, nxt_act_t *nxt_act);

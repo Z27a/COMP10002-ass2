@@ -112,31 +112,11 @@ CMakeFiles\COMP10002_ass2.dir\stage1.c.s: cmake_force
  /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) /FoNUL /FAs /FaCMakeFiles\COMP10002_ass2.dir\stage1.c.s /c C:\Users\leoli\CLionProjects\COMP10002-ass2\stage1.c
 <<
 
-CMakeFiles\COMP10002_ass2.dir\stage2.c.obj: CMakeFiles\COMP10002_ass2.dir\flags.make
-CMakeFiles\COMP10002_ass2.dir\stage2.c.obj: ..\stage2.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/COMP10002_ass2.dir/stage2.c.obj"
-	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\cl.exe @<<
- /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) /FoCMakeFiles\COMP10002_ass2.dir\stage2.c.obj /FdCMakeFiles\COMP10002_ass2.dir\ /FS -c C:\Users\leoli\CLionProjects\COMP10002-ass2\stage2.c
-<<
-
-CMakeFiles\COMP10002_ass2.dir\stage2.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/COMP10002_ass2.dir/stage2.c.i"
-	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\cl.exe > CMakeFiles\COMP10002_ass2.dir\stage2.c.i @<<
- /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\leoli\CLionProjects\COMP10002-ass2\stage2.c
-<<
-
-CMakeFiles\COMP10002_ass2.dir\stage2.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/COMP10002_ass2.dir/stage2.c.s"
-	C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\cl.exe @<<
- /nologo $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) /FoNUL /FAs /FaCMakeFiles\COMP10002_ass2.dir\stage2.c.s /c C:\Users\leoli\CLionProjects\COMP10002-ass2\stage2.c
-<<
-
 # Object files for target COMP10002_ass2
 COMP10002_ass2_OBJECTS = \
 "CMakeFiles\COMP10002_ass2.dir\main.c.obj" \
 "CMakeFiles\COMP10002_ass2.dir\stage0.c.obj" \
-"CMakeFiles\COMP10002_ass2.dir\stage1.c.obj" \
-"CMakeFiles\COMP10002_ass2.dir\stage2.c.obj"
+"CMakeFiles\COMP10002_ass2.dir\stage1.c.obj"
 
 # External object files for target COMP10002_ass2
 COMP10002_ass2_EXTERNAL_OBJECTS =
@@ -144,10 +124,9 @@ COMP10002_ass2_EXTERNAL_OBJECTS =
 COMP10002_ass2.exe: CMakeFiles\COMP10002_ass2.dir\main.c.obj
 COMP10002_ass2.exe: CMakeFiles\COMP10002_ass2.dir\stage0.c.obj
 COMP10002_ass2.exe: CMakeFiles\COMP10002_ass2.dir\stage1.c.obj
-COMP10002_ass2.exe: CMakeFiles\COMP10002_ass2.dir\stage2.c.obj
 COMP10002_ass2.exe: CMakeFiles\COMP10002_ass2.dir\build.make
 COMP10002_ass2.exe: CMakeFiles\COMP10002_ass2.dir\objects1.rsp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C executable COMP10002_ass2.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable COMP10002_ass2.exe"
 	"C:\Program Files\JetBrains\CLion 2021.1.3\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\COMP10002_ass2.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x86\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100190~1.0\x86\mt.exe --manifests -- C:\PROGRA~2\MICROS~2\2019\COMMUN~1\VC\Tools\MSVC\1429~1.300\bin\Hostx86\x86\link.exe /nologo @CMakeFiles\COMP10002_ass2.dir\objects1.rsp @<<
  /out:COMP10002_ass2.exe /implib:COMP10002_ass2.lib /pdb:C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug\COMP10002_ass2.pdb /version:0.0 /machine:X86 /debug /INCREMENTAL /subsystem:console  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib 
 <<
