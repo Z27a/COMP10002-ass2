@@ -85,8 +85,9 @@ typedef struct {
 
 typedef struct {
     int action;
-    char turn;
-} next_action_t;
+    char prev_turn;
+    int num_turns;
+} nxt_act_t;
 
 typedef struct lst_node lst_node_t;
 typedef struct state state_t;
@@ -117,10 +118,52 @@ typedef struct {
 } cam_t;
 
 
-/* function prototypes -------------------------------------------------------*/
-next_action_t do_stage0(board_t board);
+/* Stage 0 ################################################################## */
+void do_stage0(board_t board, nxt_act_t *nxt_act);
 
-void do_stage1(board_t board, char prev_turn);
+void init_board(board_t board);
+
+void fill_pieces(int row_even, int row, board_t board, char piece);
+
+void prt_board(board_t board);
+
+void prt_from_input(board_t board, nxt_act_t *nxt_act);
+
+void
+prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int cost, int is_s1);
+
+int move_valid(board_t board, move_t *move, char prev_turn, int not_exit);
+
+int outside_board(coord_t *coord);
+
+int cell_empty(board_t board, coord_t *coord);
+
+int same_colour(char c1, char c2);
+
+char lower(char c);
+
+char upper(char c);
+
+int is_upper(char c);
+
+int legal_action(board_t board, move_t *move, char from_piece);
+
+coord_t get_dist(move_t *move);
+
+void update_board(board_t board, move_t *move);
+
+int get_cost(board_t board);
+
+int check_win(board_t board, char cur_turn);
+
+move_ary get_moves(int row, int col);
+
+void pad();
+
+void newline();
+
+/* Stage 1 ################################################################## */
+void do_stage1(board_t board, nxt_act_t *nxt_act);
 
 void build_tree(state_t *parent, int depth);
 
@@ -140,46 +183,6 @@ void board_cpy(board_t orig, board_t new);
 
 cam_t backprop_cost(state_t *state, char order);
 
-void prt_move(move_t move);
+void prt_move(move_t *move);
 
-void do_stage2(board_t board);
-
-void init_board(board_t board);
-
-void fill_pieces(int row_even, int row, board_t board, char piece);
-
-void prt_board(board_t board);
-
-next_action_t prt_from_input(board_t board);
-
-int move_valid(board_t board, move_t *move, char prev_turn, int stage1);
-
-int outside_board(coord_t *coord);
-
-int cell_empty(board_t board, coord_t *coord);
-
-int same_colour(char c1, char c2);
-
-char lower(char c);
-
-char upper(char c);
-
-int is_upper(char c);
-
-int legal_action(board_t board, move_t *move, char from_piece);
-
-int valid_move(int dir, board_t board, move_t *move, char from_piece);
-
-coord_t get_dist(move_t *move);
-
-void update_board(board_t board, move_t *move);
-
-int get_cost(board_t board);
-
-move_ary get_moves(int row, int col);
-
-int same_coord(coord_t *coord1, coord_t *coord2, coord_t *c_tested);
-
-void pad();
-
-void newline();
+void do_stage2(board_t board, nxt_act_t *nxt_act);

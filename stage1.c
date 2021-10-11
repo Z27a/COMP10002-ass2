@@ -1,13 +1,13 @@
 #include "ass2.h"
 
 /* Stage 1 */
-void do_stage1(board_t board, char prev_turn) {
-    printf("stage 1\n");
+void do_stage1(board_t board, nxt_act_t *nxt_act) {
+    // TODO: if prev_turn == '\0' make it black?
     /* initialise root */
     state_t *root;
-    /* Insert previous turn into root because the root is the built from the
+    /* Insert previous prev_turn into root because the root is the built from the
      * state of the game where the previous player had just played */
-    root = init_root(board, switch_colour(prev_turn));
+    root = init_root(board, switch_colour(nxt_act->prev_turn));
     // calculate possible moves and loop through them to run build tree
 //    printf("prev_turn: %c", prev_turn);
 //    move_ary psbl_mvs = get_moves(5, 2);
@@ -22,11 +22,12 @@ void do_stage1(board_t board, char prev_turn) {
     build_tree(root, 1);
 
     cam_t cam = backprop_cost(root, root->cur_turn);
-    prt_move(cam.move);
-    //printf("curr_turn: %c\n", root->cur_turn);
-    printf("cost: %d\n", cam.cost);
-    printf("depth: %d\n", cam.depth);
 
+    update_board(board, &cam.move);
+
+    prt_inb(board, nxt_act, &cam.move, cam.cost, TRUE);
+
+    nxt_act->num_turns++;
 }
 
 
@@ -38,16 +39,18 @@ void build_tree(state_t *parent, int depth) {
         char prev_turn = switch_colour(parent->cur_turn);
         state_t *new;
         move_ary psbl_mvs;
-        int piece_found = FALSE;
+//        int piece_found = FALSE;
+//        int valid_mv_found = FALSE;
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 if (lower(parent->board[row][col]) == parent->cur_turn) {
-                    piece_found = TRUE;
+//                    piece_found = TRUE;
                     /* Get possible moves */
                     psbl_mvs = get_moves(row, col);
                     for (int i = 0; i < MAX_MOVES; i++) {
                         if (move_valid(parent->board, &psbl_mvs.moves[i], prev_turn,
                                        TRUE)) {
+//                            valid_mv_found = TRUE;
                             // malloc new data, update data
                             new = new_child(parent->board, &psbl_mvs.moves[i],
                                             parent->cur_turn);
@@ -61,6 +64,14 @@ void build_tree(state_t *parent, int depth) {
                 }
             }
         }
+//        if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
+//            /* Winning condition */
+//            if (parent->cur_turn == CELL_WPIECE) {
+//                parent->cost = INT_MIN;
+//            } else {
+//                parent->cost = INT_MAX;
+//            }
+//        }
     }
 }
 
@@ -100,7 +111,7 @@ state_t *init_root(board_t board, char cur_turn) {
     assert(root != NULL);
     //TODO: remember to have assertions. Disclose I used alistair's programs?
     board_cpy(board, root->board);
-    root->cost = get_cost(board);
+    root->cost = get_cost(board );
     root->cur_turn = cur_turn;
     root->child_hdl = new_handle();
     root->move.from.row = -1;
@@ -172,13 +183,13 @@ cam_t backprop_cost(state_t *state, char order) {
 }
 
 
-void prt_move(move_t move) {
+void prt_move(move_t *move) {
     char m1, m2, m3, m4;
-    m1 = move.from.col + 'A';
-    m2 = move.from.row + '0' + 1;
-    m3 = move.to.col + 'A';
-    m4 = move.to.row + '0' + 1;
-    printf("next move: %c%c-%c%c\n", m1, m2, m3, m4);
+    m1 = move->from.col + 'A';
+    m2 = move->from.row + '0' + 1;
+    m3 = move->to.col + 'A';
+    m4 = move->to.row + '0' + 1;
+    printf("%c%c-%c%c\n", m1, m2, m3, m4);
 //    printf("col-row: %d,%d-%d,%d\n", move.from.col, move.from.row,
 //           move.to.col, move.to.row );
 }
