@@ -100,14 +100,14 @@ struct lst_node {
 typedef struct {
     lst_node_t *head;
     lst_node_t *foot;
-} list_t;
+} lst_t;
 
 struct state {
     board_t board;
     int cost;
     move_t move;
     char cur_turn;
-    list_t *child_hdl;
+    lst_t *child_hdl;
     int depth;
 };
 
@@ -173,16 +173,18 @@ void move_cpy(move_t *orig, move_t *new);
 
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
 
-void insert_child(list_t *handle, state_t *data);
+void insert_child(lst_t *handle, state_t *data);
 
 state_t *init_root(board_t board, char cur_turn);
 
-list_t *new_handle();
+lst_t *new_handle();
 
 void board_cpy(board_t orig, board_t new);
 
 cam_t backprop_cost(state_t *state, char order);
 
 void prt_move(move_t *move);
+
+void free_tree(state_t *parent);
 
 void do_stage2(board_t board, nxt_act_t *nxt_act);

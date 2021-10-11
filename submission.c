@@ -100,14 +100,14 @@ struct lst_node {
 typedef struct {
     lst_node_t *head;
     lst_node_t *foot;
-} list_t;
+} lst_t;
 
 struct state {
     board_t board;
     int cost;
     move_t move;
     char cur_turn;
-    list_t *child_hdl;
+    lst_t *child_hdl;
     int depth;
 };
 
@@ -173,11 +173,11 @@ void move_cpy(move_t *orig, move_t *new);
 
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
 
-void insert_child(list_t *handle, state_t *data);
+void insert_child(lst_t *handle, state_t *data);
 
 state_t *init_root(board_t board, char cur_turn);
 
-list_t *new_handle();
+lst_t *new_handle();
 
 void board_cpy(board_t orig, board_t new);
 
@@ -185,7 +185,10 @@ cam_t backprop_cost(state_t *state, char order);
 
 void prt_move(move_t *move);
 
+void free_tree(state_t *parent);
+
 void do_stage2(board_t board, nxt_act_t *nxt_act);
+
 
 
 int
@@ -682,6 +685,8 @@ void do_stage1(board_t board, nxt_act_t *nxt_act) {
 
     cam_t cam = backprop_cost(root, root->cur_turn);
 
+    free_tree(root);
+
     update_board(board, &cam.move);
 
     prt_inb(board, nxt_act, &cam.move, get_cost(board), TRUE);
@@ -734,6 +739,30 @@ void build_tree(state_t *parent, int depth) {
     }
 }
 
+void free_tree(state_t *parent) {
+    assert(parent != NULL);
+    if (parent->child_hdl->head == NULL) {
+        /* Base case - no more children to free. */
+        free(parent->child_hdl);
+        free(parent);
+        return;
+    } else {
+        /* Loop through children and free them. This section is structured
+         * similarly to Alistair's code */
+        assert(parent->child_hdl != NULL);
+        lst_node_t *curr, *prev;
+        curr = parent->child_hdl->head;
+        while (curr) {
+            prev = curr;
+            curr = curr->next;
+            free_tree(prev->data);
+            free(prev);
+        }
+        free(parent->child_hdl);
+        free(parent);
+    }
+}
+
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
     state_t *new;
     new = (state_t *) malloc(sizeof(state_t));
@@ -747,7 +776,7 @@ state_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
     return new;
 }
 
-void insert_child(list_t *handle, state_t *data) {
+void insert_child(lst_t *handle, state_t *data) {
     assert(handle != NULL);
     lst_node_t *new;
     new = (lst_node_t *) malloc(sizeof(lst_node_t));
@@ -775,13 +804,12 @@ state_t *init_root(board_t board, char cur_turn) {
     root->child_hdl = new_handle();
     root->move.from.row = -1;
     root->depth = 0;
-
     return root;
 }
 
-list_t *new_handle() {
-    list_t *handle;
-    handle = (list_t *) malloc(sizeof(list_t));
+lst_t *new_handle() {
+    lst_t *handle;
+    handle = (lst_t *) malloc(sizeof(lst_t));
     assert(handle!=NULL);
     handle->head = handle->foot = NULL;
     return handle;
@@ -907,8 +935,6 @@ move_ary get_moves(int row, int col) {
     }
     return new;
 }
-
-
 
 void do_stage2(board_t board, nxt_act_t *nxt_act) {
     for (int i = 0; i < 10; i++) {
