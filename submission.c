@@ -204,7 +204,7 @@ main(int argc, char *argv[]) {
     if (next.action == 1) {
         do_stage1(board, &next);
     } else if (next.action == 2) {
-        do_stage2(board, NULL);
+        do_stage2(board, &next);
     } else {
         /* check for winner */
     }
@@ -214,6 +214,8 @@ main(int argc, char *argv[]) {
 }
 
 /* THE END -------------------------------------------------------------------*/
+
+
 
 /* Stage 0 */
 void do_stage0(board_t board, nxt_act_t *nxt_act) {
@@ -655,10 +657,11 @@ void newline() {
     printf("\n");
 }
 
+
+
 /* Stage 1 */
 void do_stage1(board_t board, nxt_act_t *nxt_act) {
     // TODO: if prev_turn == '\0' make it black?
-    printf("stage 1\n");
     /* initialise root */
     state_t *root;
     /* Insert previous prev_turn into root because the root is the built from the
@@ -681,7 +684,7 @@ void do_stage1(board_t board, nxt_act_t *nxt_act) {
 
     update_board(board, &cam.move);
 
-    prt_inb(board, nxt_act, &cam.move, cam.cost, TRUE);
+    prt_inb(board, nxt_act, &cam.move, get_cost(board), TRUE);
 
     nxt_act->num_turns++;
 }
@@ -800,7 +803,7 @@ cam_t backprop_cost(state_t *state, char order) {
             /* If current state is not the root, return the move and depth of
              * the current state */
             cam.move = state->move;
-            cam.depth = state->depth;
+            //cam.depth = state->depth;
         } else {
             /* The current state is the root. Return the move of the min/max
              * cost child state */
@@ -815,6 +818,7 @@ cam_t backprop_cost(state_t *state, char order) {
                 /* Minimise cost, Update cam with lower cost */
                 if (cam.cost > temp_cam.cost) {
                     cam.cost = temp_cam.cost;
+                    cam.depth = temp_cam.depth;
                     if (state->move.from.row != -1) {
                         cam.move = state->move;
                     } else {
@@ -825,6 +829,7 @@ cam_t backprop_cost(state_t *state, char order) {
                 /* Maximise cost */
                 if (cam.cost < temp_cam.cost) {
                     cam.cost = temp_cam.cost;
+                    cam.depth = temp_cam.depth;
                     if (state->move.from.row != -1) {
                         cam.move = state->move;
                     } else {
@@ -903,9 +908,10 @@ move_ary get_moves(int row, int col) {
     return new;
 }
 
+
+
 void do_stage2(board_t board, nxt_act_t *nxt_act) {
-    printf("stage 2");
     for (int i = 0; i < 10; i++) {
-        //do_stage1(board, nxt_act);
+        do_stage1(board, nxt_act);
     }
 }

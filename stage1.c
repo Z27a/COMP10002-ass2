@@ -23,9 +23,11 @@ void do_stage1(board_t board, nxt_act_t *nxt_act) {
 
     cam_t cam = backprop_cost(root, root->cur_turn);
 
+    //printf("depth: %d\n", cam.depth);
+
     update_board(board, &cam.move);
 
-    prt_inb(board, nxt_act, &cam.move, cam.cost, TRUE);
+    prt_inb(board, nxt_act, &cam.move, get_cost(board), TRUE);
 
     nxt_act->num_turns++;
 }
@@ -144,7 +146,7 @@ cam_t backprop_cost(state_t *state, char order) {
             /* If current state is not the root, return the move and depth of
              * the current state */
             cam.move = state->move;
-            cam.depth = state->depth;
+            //cam.depth = state->depth;
         } else {
             /* The current state is the root. Return the move of the min/max
              * cost child state */
@@ -159,6 +161,7 @@ cam_t backprop_cost(state_t *state, char order) {
                 /* Minimise cost, Update cam with lower cost */
                 if (cam.cost > temp_cam.cost) {
                     cam.cost = temp_cam.cost;
+                    cam.depth = temp_cam.depth;
                     if (state->move.from.row != -1) {
                         cam.move = state->move;
                     } else {
@@ -169,6 +172,7 @@ cam_t backprop_cost(state_t *state, char order) {
                 /* Maximise cost */
                 if (cam.cost < temp_cam.cost) {
                     cam.cost = temp_cam.cost;
+                    cam.depth = temp_cam.depth;
                     if (state->move.from.row != -1) {
                         cam.move = state->move;
                     } else {
