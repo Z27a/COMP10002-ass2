@@ -1,7 +1,7 @@
 #include "ass2.h"
 
 /* Stage 0 */
-next_action_t do_stage0(board_t board) {
+void do_stage0(board_t board, nxt_act_t *nxt_act) {
 
     init_board(board);
 
@@ -14,10 +14,8 @@ next_action_t do_stage0(board_t board) {
 
     /* Read input and print out changes to board. Print errors if input is not
      * valid */
-    return prt_from_input(board);
+    prt_from_input(board, nxt_act);
 }
-
-
 
 
 /* Loads the initial configuration into the board */
@@ -111,22 +109,22 @@ void prt_board(board_t board) {
 }
 
 
-/* Read moves and prints out the state of the board after each move. Prints
+/* Read moves and prints out the data of the board after each move. Prints
  * error messages if a move is invalid */
-next_action_t prt_from_input(board_t board) {
-    next_action_t next_action;
-    char c1, c2, c3, c4, turn;
+void prt_from_input(board_t board, nxt_act_t *nxt_act) {
+    char c1, c2, c3, c4;
     move_t move;
     int first_turn = TRUE;
-    int cost, num_turns = 1;
+    int cost;
+    int win = 0;
 
     while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) == 4) {
-        /* Determine the initial value of turn (inverse of first player) */
+        /* Determine the initial value of prev_turn (inverse of first player) */
         if (first_turn) {
             if (same_colour(board[c1 - 'A'][c2 - '0'], CELL_WPIECE)) {
-                turn = 'b';
+                nxt_act->prev_turn = CELL_BPIECE;
             } else {
-                turn = CELL_WPIECE;
+                nxt_act->prev_turn = CELL_WPIECE;
             }
             first_turn = FALSE;
         }
@@ -138,67 +136,96 @@ next_action_t prt_from_input(board_t board) {
         move.to.row = c4 - '0' - 1;
 
         /* Check if move is valid */
-        move_valid(board, &move, turn);
+//        win = check_win(board, prev_turn);
+        if (win == FALSE) {
+            move_valid(board, &move, nxt_act->prev_turn, FALSE);
+        }
+        move_valid(board, &move, nxt_act->prev_turn, FALSE);
         /* Update board */
         update_board(board, &move);
+        /* Check for a winning state */
+
         /* Get cost */
-        cost = get_cost(board);
-        /* Print board */
-        printf("=====================================\n");
-        /* Update turn */
-        if (turn == CELL_WPIECE) {
-            turn = CELL_BPIECE;
-            printf("BLACK ACTION ");
+        if (win == 1) {
+            /* White win */
+            cost = INT_MIN;
+        } else if (win == 2) {
+            cost = INT_MAX;
         } else {
-            printf("WHITE ACTION ");
-            turn = CELL_WPIECE;
+            cost = get_cost(board);
         }
-        printf("#%d: %c%c-%c%c\n", num_turns, c1, c2, c3, c4);
-        printf("BOARD COST: %d\n", cost);
-        prt_board(board);
 
-        num_turns++;
+        prt_inb(board, nxt_act, &move, cost, FALSE);
+
+        if (win == 1) {
+            /* White win */
+            printf("WHITE WIN\n");
+        } else if (win == 2) {
+            printf("BLACK WIN\n");
+        }
+        (nxt_act->num_turns)++;
     }
 
-    next_action.turn = turn;
     if (c1 == 'A') {
-        next_action.action = 1;
+        nxt_act->action = 1;
     } else if (c1 == 'P') {
-        next_action.action = 2;
+        nxt_act->action = 2;
     } else {
-        next_action.action = 0;
+        nxt_act->action = 0;
     }
-    /* No extra commands */
-    return next_action;
-    // Need to check if a player wins every time?
+    // TODO: Need to check if a player wins every time?
+}
+
+void
+prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int cost, int is_s1) {
+    /* Print board */
+    printf("=====================================\n");
+    if (is_s1) printf("*** ");
+    /* Update prev_turn */
+    if (nxt_act->prev_turn == CELL_WPIECE) {
+        printf("BLACK ACTION ");
+    } else {
+        printf("WHITE ACTION ");
+    }
+    nxt_act->prev_turn = switch_colour(nxt_act->prev_turn);
+
+    printf("#%d: ", nxt_act->num_turns);
+    prt_move(move);
+
+    printf("BOARD COST: %d\n", cost);
+    prt_board(board);
 }
 
 
 /* Checks if a move is valid */
-void move_valid(board_t board, move_t *move, char prev_turn) {
+int move_valid(board_t board, move_t *move, char prev_turn, int not_exit) {
     char from_piece = board[move->from.row][move->from.col];
 
     /* 1 Source cell is outside of the board. */
     if (outside_board(&(move->from))) {
         //TODO: need to #define these errors?
+        if (not_exit) return 0;
         printf("ERROR: Source cell is outside of the board.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 2 Target cell is outside of the board. */
     if (outside_board(&(move->to))) {
+        if (not_exit) return 0;
         printf("ERROR: Target cell is outside of the board.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 3 Source cell is empty. */
     if (cell_empty(board, &(move->from))) {
+        if (not_exit) return 0;
         printf("ERROR: Source cell is empty.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 4 Target cell is not empty. */
     if (!cell_empty(board, &(move->to))) {
+        if (not_exit) return 0;
         //printf("%d %d %d %d", move->from.row, move->from.col, move->to.row, move->to.col);
         printf("ERROR: Target cell is not empty.\n");
         exit(EXIT_FAILURE);
@@ -206,16 +233,18 @@ void move_valid(board_t board, move_t *move, char prev_turn) {
 
     /* 5 Source cell holds opponent’s piece/tower. */
     if (same_colour(prev_turn, from_piece)) {
+        if (not_exit) return 0;
         printf("ERROR: Source cell holds opponent's piece/tower.\n");
         exit(EXIT_FAILURE);
     }
 
     /* 6 Illegal action. */
     if (!legal_action(board, move, from_piece)) {
+        if (not_exit) return 0;
         printf("ERROR: Illegal action.\n");
         exit(EXIT_FAILURE);
     }
-
+    return 1;
 }
 
 /* Checks if a coordinate lies outside the board */
@@ -269,49 +298,42 @@ int is_upper(char c) {
 
 /* Checks if an action is legal */
 int legal_action(board_t board, move_t *move, char from_piece) {
-    //coord_t to = move->to, from = move->from;
-
     char from_colour = lower(from_piece);
-
+    int dir;
+    if (from_colour == CELL_WPIECE) {
+        dir = +1;
+    } else {
+        dir = -1;
+    }
     coord_t dist = get_dist(move);
-
-    char cap_colour = lower(
+    char cap_piece = lower(
             board[move->from.row + dist.row / 2][move->from.col +
                                                  dist.col / 2]);
-
-    if (from_colour == CELL_WPIECE) {
-        return valid_move(+1, &dist, from_colour, cap_colour,
-                          lower(from_piece));
-    }
-    return valid_move(-1, &dist, from_colour, cap_colour, lower(from_piece));
-}
-
-
-/* Checks if a move is valid. Confusing with legal action existing and all huh
- * dir = +1 for white, -1 for black */
-int valid_move(int dir, coord_t *dist, char from_colour, char cap_colour,
-               int is_tower) {
-    if (dist->row == dir * 1 && (dist->col == 1 || dist->col == -1)) {
-        /* Move is one cell diagonally down */
+    if (dist.row == dir && (abs(dist.col) == 1)) {
+        /* Move is one cell diagonally */
         return 1;
     }
-    if (dist->row == dir * 2 && (dist->col == 2 || dist->col == -2)) {
-        /* Move is two cells diagonally down */
-        if (!same_colour(from_colour, cap_colour)) {
-            /* Captured piece is the other player's */
+    if (dist.row == dir * 2 && (abs(dist.col) == 2)) {
+        /* Move is two cells diagonally */
+        if (cap_piece != CELL_EMPTY && !same_colour(from_colour, cap_piece)) {
+            /* Captured cell is not empty and captured piece is the other
+             * player's */
             return 1;
         }
     }
-    if (is_tower) {
+    if (is_upper(from_piece)) {
+        //printf("yea\n");
         /* Tower */
-        if (dist->row == -dir * 1 && (dist->col == 1 || dist->col == -1)) {
-            /* Move is one cell diagonally up */
+        if (dist.row == -dir && (abs(dist.col) == 1)) {
+            /* Move is one cell diagonally */
             return 1;
         }
-        if (dist->row == -dir * 2 && (dist->col == 2 || dist->col == -2)) {
-            /* Move is two cells diagonally up */
-            if (!same_colour(from_colour, cap_colour)) {
-                /* Captured piece is the other player's */
+        if (dist.row == -dir * 2 && (abs(dist.col) == 2)) {
+            /* Move is two cells diagonally */
+            if (cap_piece != CELL_EMPTY &&
+                !same_colour(from_colour, cap_piece)) {
+                /* Captured cell is not empty and captured piece is the other
+                 * player's */
                 return 1;
             }
         }
@@ -333,7 +355,7 @@ void update_board(board_t board, move_t *move) {
     char moved_piece = board[move->from.row][move->from.col];
 
     /* 'To' cell takes value of 'from' cell */
-    if ((move->to.row == BOARD_SIZE || move->to.row == 0) &&
+    if ((move->to.row == BOARD_SIZE - 1 || move->to.row == 0) &&
         !is_upper(moved_piece)) {
         /* Normal piece becomes a tower piece */
         board[move->to.row][move->to.col] = upper(
@@ -375,17 +397,45 @@ int get_cost(board_t board) {
     return cost;
 }
 
-void do_stage2(board_t board) {
-    printf("stage 2");
+int check_win(board_t board, char cur_turn) {
+    move_ary psbl_mvs;
+    int piece_found = FALSE;
+    int valid_mv_found = FALSE;
+    for (int row = 0; row < BOARD_SIZE; row++) {
+        for (int col = 0; col < BOARD_SIZE; col++) {
+            if (lower(board[row][col]) == switch_colour(cur_turn)) {
+                piece_found = TRUE;
+            }
+            if (lower(board[row][col]) == cur_turn) {
+                /* Get possible moves */
+                psbl_mvs = get_moves(row, col);
+                for (int i = 0; i < MAX_MOVES; i++) {
+                    if (move_valid(board, &psbl_mvs.moves[i],
+                                   switch_colour(cur_turn), TRUE)) {
+                        valid_mv_found = TRUE;
+                    }
+                }
+            }
+        }
+    }
+    if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
+        /* Winning condition */
+        if (cur_turn == CELL_WPIECE) {
+            return 1;
+        } else {
+            return 2;
+        }
+    }
+    return 0;
 }
 
 
 /* Adds padding to output */
-void pad() {
-    printf("   ");
-}
+            void pad() {
+                printf("   ");
+            }
 
 /* Adds newline to output */
-void newline() {
-    printf("\n");
-}
+            void newline() {
+                printf("\n");
+            }

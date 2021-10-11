@@ -3,19 +3,22 @@
 int
 main(int argc, char *argv[]) {
     //TODO: Add function separator lines after i've finished
+    // What if only input is A or P
 
     // YOUR IMPLEMENTATION OF STAGES 0-2
     board_t board;
-    next_action_t next;
+    nxt_act_t next;
+    next.num_turns = 1;
+    next.prev_turn = '\0';
 
-    next = do_stage0(board);
+    do_stage0(board, &next);
 
     if (next.action == 1) {
-        do_stage1(board, next.turn);
+        do_stage1(board, &next);
     } else if (next.action == 2) {
-        do_stage2(board);
+        do_stage2(board, &next);
     } else {
-        // check for winner?
+        /* check for winner */
     }
 
 

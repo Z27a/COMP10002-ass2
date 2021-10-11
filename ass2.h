@@ -63,10 +63,10 @@ typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 #define TRUE 1
 #define FALSE 0
 #define NUM_PIECES (int) (ROWS_WITH_PIECES*BOARD_SIZE*0.5)
-
 // TODO: make row sep dynamic?
 #define ROW_SEP "+---+---+---+---+---+---+---+---+"
 #define COL_SEP "|"
+#define MAX_MOVES 8
 
 /* typedefs ------------------------------------------------------------------*/
 typedef struct {
@@ -80,32 +80,46 @@ typedef struct {
 } move_t;
 
 typedef struct {
+    move_t moves[MAX_MOVES];
+} move_ary;
+
+typedef struct {
     int action;
-    char turn;
-} next_action_t;
+    char prev_turn;
+    int num_turns;
+} nxt_act_t;
 
-typedef struct node node_t;
+typedef struct lst_node lst_node_t;
+typedef struct state state_t;
 
-struct node {
+struct lst_node {
+    state_t *data;
+    lst_node_t *next;
+};
+
+typedef struct {
+    lst_node_t *head;
+    lst_node_t *foot;
+} lst_t;
+
+struct state {
     board_t board;
     int cost;
     move_t move;
-    char turn;
-    node_t *parent;
-    node_t *cdrn[TREE_DEPTH];
+    char cur_turn;
+    lst_t *child_hdl;
+    int depth;
 };
 
+typedef struct {
+    int cost;
+    move_t move;
+    int depth;
+} cam_t;
 
-/* function prototypes -------------------------------------------------------*/
-next_action_t do_stage0(board_t board);
 
-void do_stage1(board_t board, char turn);
-
-node_t *build_tree(node_t *node, int depth);
-
-void board_cpy(board_t orig, board_t new);
-
-void do_stage2(board_t board);
+/* Stage 0 ################################################################## */
+void do_stage0(board_t board, nxt_act_t *nxt_act);
 
 void init_board(board_t board);
 
@@ -113,9 +127,12 @@ void fill_pieces(int row_even, int row, board_t board, char piece);
 
 void prt_board(board_t board);
 
-next_action_t prt_from_input(board_t board);
+void prt_from_input(board_t board, nxt_act_t *nxt_act);
 
-void move_valid(board_t board, move_t *move, char prev_turn);
+void
+prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int cost, int is_s1);
+
+int move_valid(board_t board, move_t *move, char prev_turn, int not_exit);
 
 int outside_board(coord_t *coord);
 
@@ -131,19 +148,43 @@ int is_upper(char c);
 
 int legal_action(board_t board, move_t *move, char from_piece);
 
-int valid_move(int dir, coord_t *dist, char from_colour, char cap_colour,
-               int is_tower);
-
 coord_t get_dist(move_t *move);
 
 void update_board(board_t board, move_t *move);
 
 int get_cost(board_t board);
 
-coord_t diag(coord_t from, int dist, int dir);
+int check_win(board_t board, char cur_turn);
 
-int same_coord(coord_t *coord1, coord_t *coord2, coord_t *c_tested);
+move_ary get_moves(int row, int col);
 
 void pad();
 
 void newline();
+
+/* Stage 1 ################################################################## */
+void do_stage1(board_t board, nxt_act_t *nxt_act);
+
+void build_tree(state_t *parent, int depth);
+
+char switch_colour(char orig);
+
+void move_cpy(move_t *orig, move_t *new);
+
+state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
+
+void insert_child(lst_t *handle, state_t *data);
+
+state_t *init_root(board_t board, char cur_turn);
+
+lst_t *new_handle();
+
+void board_cpy(board_t orig, board_t new);
+
+cam_t backprop_cost(state_t *state, char order);
+
+void prt_move(move_t *move);
+
+void free_tree(state_t *parent);
+
+void do_stage2(board_t board, nxt_act_t *nxt_act);
