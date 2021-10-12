@@ -115,8 +115,6 @@ void prt_from_input(board_t board, nxt_act_t *nxt_act) {
     char c1, c2, c3, c4;
     move_t move;
     int first_turn = TRUE;
-    int cost;
-    int win = 0;
 
     while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) == 4) {
         /* Determine the initial value of prev_turn (inverse of first player) */
@@ -136,33 +134,13 @@ void prt_from_input(board_t board, nxt_act_t *nxt_act) {
         move.to.row = c4 - '0' - 1;
 
         /* Check if move is valid */
-//        win = check_win(board, prev_turn);
-        if (win == FALSE) {
-            move_valid(board, &move, nxt_act->prev_turn, FALSE);
-        }
         move_valid(board, &move, nxt_act->prev_turn, FALSE);
         /* Update board */
         update_board(board, &move);
         /* Check for a winning state */
 
-        /* Get cost */
-        if (win == 1) {
-            /* White win */
-            cost = INT_MIN;
-        } else if (win == 2) {
-            cost = INT_MAX;
-        } else {
-            cost = get_cost(board);
-        }
+        prt_inb(board, nxt_act, &move, FALSE);
 
-        prt_inb(board, nxt_act, &move, cost, FALSE);
-
-        if (win == 1) {
-            /* White win */
-            printf("WHITE WIN\n");
-        } else if (win == 2) {
-            printf("BLACK WIN\n");
-        }
         (nxt_act->num_turns)++;
     }
 
@@ -177,7 +155,8 @@ void prt_from_input(board_t board, nxt_act_t *nxt_act) {
 }
 
 void
-prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int cost, int is_s1) {
+prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int is_s1) {
+    int cost = get_cost(board);
     /* Print board */
     printf("=====================================\n");
     if (is_s1) printf("*** ");
@@ -187,13 +166,24 @@ prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int cost, int is_s1) {
     } else {
         printf("WHITE ACTION ");
     }
-    nxt_act->prev_turn = switch_colour(nxt_act->prev_turn);
+
 
     printf("#%d: ", nxt_act->num_turns);
     prt_move(move);
 
     printf("BOARD COST: %d\n", cost);
     prt_board(board);
+
+    if (has_won(board, nxt_act->prev_turn)) {
+        if (nxt_act->prev_turn == CELL_WPIECE) {
+            printf("BLACK WIN!\n");
+        } else {
+            printf("WHITE WIN!\n");
+        }
+        exit(EXIT_SUCCESS);
+    }
+
+    nxt_act->prev_turn = switch_colour(nxt_act->prev_turn);
 }
 
 
@@ -226,7 +216,6 @@ int move_valid(board_t board, move_t *move, char prev_turn, int not_exit) {
     /* 4 Target cell is not empty. */
     if (!cell_empty(board, &(move->to))) {
         if (not_exit) return 0;
-        //printf("%d %d %d %d", move->from.row, move->from.col, move->to.row, move->to.col);
         printf("ERROR: Target cell is not empty.\n");
         exit(EXIT_FAILURE);
     }
@@ -376,9 +365,21 @@ void update_board(board_t board, move_t *move) {
     }
 }
 
+//int get_cost(board_t board, char nxt_turn) {
+//    int cost;
+//    if (has_won(board, nxt_turn)) {
+//        if (nxt_turn == CELL_WPIECE) {
+//            cost = INT_MAX;
+//        } else {
+//            cost = INT_MIN;
+//        }
+//        return cost;
+//    }
+//    return get_cost(board);
+//}
+
 int get_cost(board_t board) {
     int cost = 0;
-
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
             if (board[row][col] == CELL_EMPTY) {
@@ -397,21 +398,19 @@ int get_cost(board_t board) {
     return cost;
 }
 
-int check_win(board_t board, char cur_turn) {
+int has_won(board_t board, char nxt_turn) {
     move_ary psbl_mvs;
     int piece_found = FALSE;
     int valid_mv_found = FALSE;
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
-            if (lower(board[row][col]) == switch_colour(cur_turn)) {
+            if (lower(board[row][col]) == nxt_turn) {
                 piece_found = TRUE;
-            }
-            if (lower(board[row][col]) == cur_turn) {
                 /* Get possible moves */
                 psbl_mvs = get_moves(row, col);
                 for (int i = 0; i < MAX_MOVES; i++) {
                     if (move_valid(board, &psbl_mvs.moves[i],
-                                   switch_colour(cur_turn), TRUE)) {
+                                   switch_colour(nxt_turn), TRUE)) {
                         valid_mv_found = TRUE;
                     }
                 }
@@ -420,22 +419,18 @@ int check_win(board_t board, char cur_turn) {
     }
     if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
         /* Winning condition */
-        if (cur_turn == CELL_WPIECE) {
-            return 1;
-        } else {
-            return 2;
-        }
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 
 /* Adds padding to output */
-            void pad() {
-                printf("   ");
-            }
+void pad() {
+    printf("   ");
+}
 
 /* Adds newline to output */
-            void newline() {
-                printf("\n");
-            }
+void newline() {
+    printf("\n");
+}

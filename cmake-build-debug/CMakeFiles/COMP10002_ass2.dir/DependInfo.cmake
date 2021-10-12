@@ -11,7 +11,6 @@ set(CMAKE_DEPENDS_CHECK_C
   "C:/Users/leoli/CLionProjects/COMP10002-ass2/main.c" "C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug/CMakeFiles/COMP10002_ass2.dir/main.c.obj"
   "C:/Users/leoli/CLionProjects/COMP10002-ass2/stage0.c" "C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug/CMakeFiles/COMP10002_ass2.dir/stage0.c.obj"
   "C:/Users/leoli/CLionProjects/COMP10002-ass2/stage1.c" "C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug/CMakeFiles/COMP10002_ass2.dir/stage1.c.obj"
-  "C:/Users/leoli/CLionProjects/COMP10002-ass2/stage2.c" "C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug/CMakeFiles/COMP10002_ass2.dir/stage2.c.obj"
   )
 set(CMAKE_C_COMPILER_ID "MSVC")
 

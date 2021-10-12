@@ -1,0 +1,882 @@
+        -:    0:Source:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/stage0.c
+        -:    0:Graph:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/CMakeFiles/COMP10002_ass2.dir/stage0.c.gcno
+        -:    0:Data:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/CMakeFiles/COMP10002_ass2.dir/stage0.c.gcda
+        -:    0:Runs:1
+        -:    1:#include "ass2.h"
+        -:    2:
+        -:    3:/* Stage 0 */
+function do_stage0 called 1 returned 100% blocks executed 100%
+        1:    4:void do_stage0(board_t board, nxt_act_t *nxt_act) {
+        -:    5:
+        1:    6:    init_board(board);
+        1:    6-block  0
+call    0 returned 1
+        -:    7:
+        -:    8:    /* Print initial board config and info */
+        1:    9:    printf("BOARD SIZE: %dx%d\n", BOARD_SIZE, BOARD_SIZE);
+call    0 returned 1
+        1:   10:    printf("#BLACK PIECES: %d\n",
+call    0 returned 1
+        -:   11:           NUM_PIECES); //TODO: #define these strings. Also use preincrement for off by one situations?
+        1:   12:    printf("#WHITE PIECES: %d\n", NUM_PIECES);
+call    0 returned 1
+        1:   13:    prt_board(board);
+call    0 returned 1
+        -:   14:
+        -:   15:    /* Read input and print out changes to board. Print errors if input is not
+        -:   16:     * valid */
+        1:   17:    prt_from_input(board, nxt_act);
+call    0 returned 1
+        1:   18:}
+        -:   19:
+        -:   20:
+        -:   21:/* Loads the initial configuration into the board */
+function init_board called 1 returned 100% blocks executed 100%
+        1:   22:void init_board(board_t board) {
+        -:   23:    /* Assumes that the top left cell is always white and white pieces go
+        -:   24:     * on the top of tbe board */
+        -:   25:
+        -:   26:    /* Loop through rows and add values */
+        -:   27:    int top, mid, btm;
+        -:   28:
+        -:   29:    /* Top rows with white pieces */
+        4:   30:    for (top = 0; top < ROWS_WITH_PIECES; top++) {
+        1:   30-block  0
+        4:   30-block  1
+branch  0 taken 3
+branch  1 taken 1 (fallthrough)
+        3:   31:        fill_pieces(((top + 1) % 2 == 0), top, board, CELL_WPIECE);
+        3:   31-block  0
+call    0 returned 3
+        -:   32:    }
+        -:   33:    /* Middle rows with no pieces */
+        3:   34:    for (mid = top; mid < BOARD_SIZE - ROWS_WITH_PIECES; mid++) {
+        1:   34-block  0
+        2:   34-block  1
+        3:   34-block  2
+branch  0 taken 2
+branch  1 taken 1 (fallthrough)
+       18:   35:        for (int cell = 0; cell < BOARD_SIZE; cell++) {
+        2:   35-block  0
+       18:   35-block  1
+branch  0 taken 16
+branch  1 taken 2 (fallthrough)
+       16:   36:            board[mid][cell] = CELL_EMPTY;
+       16:   36-block  0
+        -:   37:        }
+        -:   38:    }
+        -:   39:    /* Bottom rows with black pieces */
+        4:   40:    for (btm = mid; btm < BOARD_SIZE; btm++) {
+        1:   40-block  0
+        4:   40-block  1
+branch  0 taken 3
+branch  1 taken 1 (fallthrough)
+        3:   41:        fill_pieces(((btm + 1) % 2 == 0), btm, board, CELL_BPIECE);
+        3:   41-block  0
+call    0 returned 3
+        -:   42:    }
+        1:   43:}
+        -:   44:
+        -:   45:
+        -:   46:/* Fills in a row that contains pieces */
+function fill_pieces called 6 returned 100% blocks executed 100%
+        6:   47:void fill_pieces(int row_even, int row, board_t board, char piece) {
+        -:   48:    int was_piece;
+        -:   49:
+        6:   50:    if (row_even) {
+        6:   50-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 3
+        -:   51:        /* Row starts with a piece */
+        3:   52:        was_piece = FALSE;
+        3:   52-block  0
+        -:   53:    } else {
+        -:   54:        /* Row doesn't start with a piece */
+        3:   55:        was_piece = TRUE;
+        3:   55-block  0
+        -:   56:    }
+        -:   57:
+       54:   58:    for (int col = 0; col < BOARD_SIZE; col++) {
+        6:   58-block  0
+       48:   58-block  1
+       54:   58-block  2
+branch  0 taken 48
+branch  1 taken 6 (fallthrough)
+       48:   59:        if (was_piece) {
+       48:   59-block  0
+branch  0 taken 24 (fallthrough)
+branch  1 taken 24
+        -:   60:            /* Current cell is empty */
+       24:   61:            board[row][col] = CELL_EMPTY;
+       24:   62:            was_piece = FALSE;
+       24:   62-block  0
+        -:   63:        } else {
+        -:   64:            /* Current cell is a piece */
+       24:   65:            board[row][col] = piece;
+       24:   66:            was_piece = TRUE;
+       24:   66-block  0
+        -:   67:        }
+        -:   68:    }
+        6:   69:}
+        -:   70:
+        -:   71:
+        -:   72:/* Prints the board with formatting */
+function prt_board called 63 returned 100% blocks executed 100%
+       63:   73:void prt_board(board_t board) {
+        -:   74:    /* Column letters */
+       63:   75:    pad();
+       63:   75-block  0
+call    0 returned 63
+      567:   76:    for (int col = 0; col < BOARD_SIZE; col++) {
+      504:   76-block  0
+      567:   76-block  1
+branch  0 taken 504
+branch  1 taken 63 (fallthrough)
+      504:   77:        printf("  %c", 'A' + col);
+      504:   77-block  0
+call    0 returned 504
+      504:   78:        if (col + 1 < BOARD_SIZE) {
+branch  0 taken 441 (fallthrough)
+branch  1 taken 63
+      441:   79:            printf(" ");
+      441:   79-block  0
+call    0 returned 441
+        -:   80:        } else {
+       63:   81:            newline();
+       63:   81-block  0
+call    0 returned 63
+        -:   82:        }
+        -:   83:    }
+        -:   84:
+        -:   85:    /* initial row separator */
+       63:   86:    pad();
+       63:   86-block  0
+call    0 returned 63
+       63:   87:    printf("%s", ROW_SEP);
+call    0 returned 63
+       63:   88:    newline();
+call    0 returned 63
+        -:   89:
+        -:   90:    /* Rest of the rows */
+      567:   91:    for (int row = 0; row < BOARD_SIZE; row++) {
+      567:   91-block  0
+branch  0 taken 504
+branch  1 taken 63 (fallthrough)
+        -:   92:        /* Row number */
+      504:   93:        printf(" %d ", row + 1);
+      504:   93-block  0
+call    0 returned 504
+        -:   94:
+        -:   95:        /* Board contents */
+     4536:   96:        for (int col = 0; col < BOARD_SIZE; col++) {
+     4032:   96-block  0
+     4536:   96-block  1
+branch  0 taken 4032
+branch  1 taken 504 (fallthrough)
+     4032:   97:            printf("%s %c ", COL_SEP, board[row][col]);
+     4032:   97-block  0
+call    0 returned 4032
+     4032:   98:            if (col + 1 == BOARD_SIZE) {
+branch  0 taken 504 (fallthrough)
+branch  1 taken 3528
+      504:   99:                printf("%s", COL_SEP);
+      504:   99-block  0
+call    0 returned 504
+      504:  100:                newline();
+call    0 returned 504
+        -:  101:            }
+        -:  102:        }
+        -:  103:
+        -:  104:        /* Row separator */
+      504:  105:        pad();
+      504:  105-block  0
+call    0 returned 504
+      504:  106:        printf("%s", ROW_SEP);
+call    0 returned 504
+      504:  107:        newline();
+call    0 returned 504
+        -:  108:    }
+       63:  109:}
+        -:  110:
+        -:  111:
+        -:  112:/* Read moves and prints out the data of the board after each move. Prints
+        -:  113: * error messages if a move is invalid */
+function prt_from_input called 1 returned 100% blocks executed 77%
+        1:  114:void prt_from_input(board_t board, nxt_act_t *nxt_act) {
+        -:  115:    char c1, c2, c3, c4;
+        -:  116:    move_t move;
+        1:  117:    int first_turn = TRUE;
+        -:  118:    int cost;
+        1:  119:    int win = 0;
+        -:  120:
+       13:  121:    while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) == 4) {
+        1:  121-block  0
+       13:  121-block  1
+call    0 returned 13
+branch  1 taken 12
+branch  2 taken 1 (fallthrough)
+        -:  122:        /* Determine the initial value of prev_turn (inverse of first player) */
+       12:  123:        if (first_turn) {
+       12:  123-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 11
+        1:  124:            if (same_colour(board[c1 - 'A'][c2 - '0'], CELL_WPIECE)) {
+        1:  124-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  125:                nxt_act->prev_turn = CELL_BPIECE;
+    %%%%%:  125-block  0
+        -:  126:            } else {
+        1:  127:                nxt_act->prev_turn = CELL_WPIECE;
+        1:  127-block  0
+        -:  128:            }
+        1:  129:            first_turn = FALSE;
+        1:  129-block  0
+        -:  130:        }
+        -:  131:
+        -:  132:        /* Assign values to move */
+       12:  133:        move.from.col = c1 - 'A'; //TODO: update the As and 0s with #defines
+       12:  134:        move.from.row = c2 - '0' - 1;
+       12:  135:        move.to.col = c3 - 'A';
+       12:  136:        move.to.row = c4 - '0' - 1;
+        -:  137:
+        -:  138:        /* Check if move is valid */
+        -:  139://        win = check_win(board, prev_turn);
+       12:  140:        if (win == FALSE) {
+       12:  140-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       12:  141:            move_valid(board, &move, nxt_act->prev_turn, FALSE);
+       12:  141-block  0
+call    0 returned 12
+        -:  142:        }
+       12:  143:        move_valid(board, &move, nxt_act->prev_turn, FALSE);
+       12:  143-block  0
+call    0 returned 12
+        -:  144:        /* Update board */
+       12:  145:        update_board(board, &move);
+call    0 returned 12
+        -:  146:        /* Check for a winning state */
+        -:  147:
+        -:  148:        /* Get cost */
+       12:  149:        if (win == 1) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+        -:  150:            /* White win */
+    #####:  151:            cost = INT_MIN;
+    %%%%%:  151-block  0
+       12:  152:        } else if (win == 2) {
+       12:  152-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+    #####:  153:            cost = INT_MAX;
+    %%%%%:  153-block  0
+        -:  154:        } else {
+       12:  155:            cost = get_cost(board);
+       12:  155-block  0
+call    0 returned 12
+        -:  156:        }
+        -:  157:
+       12:  158:        prt_inb(board, nxt_act, &move, cost, FALSE);
+       12:  158-block  0
+call    0 returned 12
+        -:  159:
+       12:  160:        if (win == 1) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+        -:  161:            /* White win */
+    #####:  162:            printf("WHITE WIN\n");
+    %%%%%:  162-block  0
+call    0 never executed
+       12:  163:        } else if (win == 2) {
+       12:  163-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+    #####:  164:            printf("BLACK WIN\n");
+    %%%%%:  164-block  0
+call    0 never executed
+        -:  165:        }
+       12:  166:        (nxt_act->num_turns)++;
+       12:  166-block  0
+        -:  167:    }
+        -:  168:
+        1:  169:    if (c1 == 'A') {
+        1:  169-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  170:        nxt_act->action = 1;
+    %%%%%:  170-block  0
+        1:  171:    } else if (c1 == 'P') {
+        1:  171-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  172:        nxt_act->action = 2;
+        1:  172-block  0
+        -:  173:    } else {
+    #####:  174:        nxt_act->action = 0;
+    %%%%%:  174-block  0
+        -:  175:    }
+        -:  176:    // TODO: Need to check if a player wins every time?
+        1:  177:}
+        -:  178:
+        -:  179:void
+function prt_inb called 62 returned 100% blocks executed 100%
+       62:  180:prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int cost, int is_s1) {
+        -:  181:    /* Print board */
+       62:  182:    printf("=====================================\n");
+       62:  182-block  0
+call    0 returned 62
+       62:  183:    if (is_s1) printf("*** ");
+branch  0 taken 50 (fallthrough)
+branch  1 taken 12
+       50:  183-block  0
+call    2 returned 50
+        -:  184:    /* Update prev_turn */
+       62:  185:    if (nxt_act->prev_turn == CELL_WPIECE) {
+       62:  185-block  0
+branch  0 taken 31 (fallthrough)
+branch  1 taken 31
+       31:  186:        printf("BLACK ACTION ");
+       31:  186-block  0
+call    0 returned 31
+        -:  187:    } else {
+       31:  188:        printf("WHITE ACTION ");
+       31:  188-block  0
+call    0 returned 31
+        -:  189:    }
+       62:  190:    nxt_act->prev_turn = switch_colour(nxt_act->prev_turn);
+       62:  190-block  0
+call    0 returned 62
+        -:  191:
+       62:  192:    printf("#%d: ", nxt_act->num_turns);
+call    0 returned 62
+       62:  193:    prt_move(move);
+call    0 returned 62
+        -:  194:
+       62:  195:    printf("BOARD COST: %d\n", cost);
+call    0 returned 62
+       62:  196:    prt_board(board);
+call    0 returned 62
+       62:  197:}
+        -:  198:
+        -:  199:
+        -:  200:/* Checks if a move is valid */
+function move_valid called 210200 returned 100% blocks executed 53%
+   210200:  201:int move_valid(board_t board, move_t *move, char prev_turn, int not_exit) {
+   210200:  202:    char from_piece = board[move->from.row][move->from.col];
+        -:  203:
+        -:  204:    /* 1 Source cell is outside of the board. */
+   210200:  205:    if (outside_board(&(move->from))) {
+   210200:  205-block  0
+call    0 returned 210200
+branch  1 taken 0 (fallthrough)
+branch  2 taken 210200
+        -:  206:        //TODO: need to #define these errors?
+    #####:  207:        if (not_exit) return 0;
+    %%%%%:  207-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  207-block  1
+    #####:  208:        printf("ERROR: Source cell is outside of the board.\n");
+    %%%%%:  208-block  0
+call    0 never executed
+    #####:  209:        exit(EXIT_FAILURE);
+call    0 never executed
+        -:  210:    }
+        -:  211:
+        -:  212:    /* 2 Target cell is outside of the board. */
+   210200:  213:    if (outside_board(&(move->to))) {
+   210200:  213-block  0
+call    0 returned 210200
+branch  1 taken 72808 (fallthrough)
+branch  2 taken 137392
+    72808:  214:        if (not_exit) return 0;
+    72808:  214-block  0
+branch  0 taken 72808 (fallthrough)
+branch  1 taken 0
+    72808:  214-block  1
+    #####:  215:        printf("ERROR: Target cell is outside of the board.\n");
+    %%%%%:  215-block  0
+call    0 never executed
+    #####:  216:        exit(EXIT_FAILURE);
+call    0 never executed
+        -:  217:    }
+        -:  218:
+        -:  219:    /* 3 Source cell is empty. */
+   137392:  220:    if (cell_empty(board, &(move->from))) {
+   137392:  220-block  0
+call    0 returned 137392
+branch  1 taken 0 (fallthrough)
+branch  2 taken 137392
+    #####:  221:        if (not_exit) return 0;
+    %%%%%:  221-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  221-block  1
+    #####:  222:        printf("ERROR: Source cell is empty.\n");
+    %%%%%:  222-block  0
+call    0 never executed
+    #####:  223:        exit(EXIT_FAILURE);
+call    0 never executed
+        -:  224:    }
+        -:  225:
+        -:  226:    /* 4 Target cell is not empty. */
+   137392:  227:    if (!cell_empty(board, &(move->to))) {
+   137392:  227-block  0
+call    0 returned 137392
+branch  1 taken 68075 (fallthrough)
+branch  2 taken 69317
+    68075:  228:        if (not_exit) return 0;
+    68075:  228-block  0
+branch  0 taken 68075 (fallthrough)
+branch  1 taken 0
+    68075:  228-block  1
+        -:  229:        //printf("%d %d %d %d", move->from.row, move->from.col, move->to.row, move->to.col);
+    #####:  230:        printf("ERROR: Target cell is not empty.\n");
+    %%%%%:  230-block  0
+call    0 never executed
+    #####:  231:        exit(EXIT_FAILURE);
+call    0 never executed
+        -:  232:    }
+        -:  233:
+        -:  234:    /* 5 Source cell holds opponent’s piece/tower. */
+    69317:  235:    if (same_colour(prev_turn, from_piece)) {
+    69317:  235-block  0
+call    0 returned 69317
+branch  1 taken 0 (fallthrough)
+branch  2 taken 69317
+    #####:  236:        if (not_exit) return 0;
+    %%%%%:  236-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  236-block  1
+    #####:  237:        printf("ERROR: Source cell holds opponent's piece/tower.\n");
+    %%%%%:  237-block  0
+call    0 never executed
+    #####:  238:        exit(EXIT_FAILURE);
+call    0 never executed
+        -:  239:    }
+        -:  240:
+        -:  241:    /* 6 Illegal action. */
+    69317:  242:    if (!legal_action(board, move, from_piece)) {
+    69317:  242-block  0
+call    0 returned 69317
+branch  1 taken 40814 (fallthrough)
+branch  2 taken 28503
+    40814:  243:        if (not_exit) return 0;
+    40814:  243-block  0
+branch  0 taken 40814 (fallthrough)
+branch  1 taken 0
+    40814:  243-block  1
+    #####:  244:        printf("ERROR: Illegal action.\n");
+    %%%%%:  244-block  0
+call    0 never executed
+    #####:  245:        exit(EXIT_FAILURE);
+call    0 never executed
+        -:  246:    }
+    28503:  247:    return 1;
+    28503:  247-block  0
+        -:  248:}
+        -:  249:
+        -:  250:/* Checks if a coordinate lies outside the board */
+function outside_board called 420400 returned 100% blocks executed 100%
+   420400:  251:int outside_board(coord_t *coord) {
+   420400:  252:    if (coord->col >= BOARD_SIZE || coord->col < 0 ||
+   420400:  252-block  0
+branch  0 taken 401112 (fallthrough)
+branch  1 taken 19288
+   401112:  252-block  1
+branch  2 taken 381136 (fallthrough)
+branch  3 taken 19976
+   381136:  253:        coord->row >= BOARD_SIZE || coord->row < 0) {
+   381136:  253-block  0
+branch  0 taken 358748 (fallthrough)
+branch  1 taken 22388
+   358748:  253-block  1
+branch  2 taken 11156 (fallthrough)
+branch  3 taken 347592
+    72808:  254:        return TRUE;
+    72808:  254-block  0
+        -:  255:    }
+   347592:  256:    return FALSE;
+   347592:  256-block  0
+        -:  257:}
+        -:  258:
+        -:  259:/* Checks if a cell is empty */
+function cell_empty called 274784 returned 100% blocks executed 100%
+   274784:  260:int cell_empty(board_t board, coord_t *coord) {
+   274784:  261:    if (board[coord->row][coord->col] == CELL_EMPTY) {
+   274784:  261-block  0
+branch  0 taken 69317 (fallthrough)
+branch  1 taken 205467
+        -:  262:        //printf("here, %d %d, board: '%c'\n", coord->row, coord->col, board[coord->row][coord->col]);
+    69317:  263:        return TRUE;
+    69317:  263-block  0
+        -:  264:    }
+   205467:  265:    return FALSE;
+   205467:  265-block  0
+        -:  266:}
+        -:  267:
+function same_colour called 79197 returned 100% blocks executed 100%
+    79197:  268:int same_colour(char c1, char c2) {
+    79197:  269:    if (lower(c1) == lower(c2)) {
+    79197:  269-block  0
+call    0 returned 79197
+call    1 returned 79197
+branch  2 taken 6352 (fallthrough)
+branch  3 taken 72845
+     6352:  270:        return 1;
+     6352:  270-block  0
+        -:  271:    }
+    72845:  272:    return 0;
+    72845:  272-block  0
+        -:  273:}
+        -:  274:
+        -:  275:/* Return the lowercase version of letters */
+function lower called 513924 returned 100% blocks executed 100%
+   513924:  276:char lower(char c) {
+   513924:  277:    if (is_upper(c)) {
+   513924:  277-block  0
+call    0 returned 513924
+branch  1 taken 22823 (fallthrough)
+branch  2 taken 491101
+    22823:  278:        return (c + 32);
+    22823:  278-block  0
+        -:  279:    }
+   491101:  280:    return c;
+   491101:  280-block  0
+        -:  281:}
+        -:  282:
+        -:  283:/* Return the uppercase version of letters */
+function upper called 241 returned 100% blocks executed 80%
+      241:  284:char upper(char c) {
+      241:  285:    if (!is_upper(c)) {
+      241:  285-block  0
+call    0 returned 241
+branch  1 taken 241 (fallthrough)
+branch  2 taken 0
+      241:  286:        return (c - 32);
+      241:  286-block  0
+        -:  287:    }
+    #####:  288:    return c;
+    %%%%%:  288-block  0
+        -:  289:}
+        -:  290:
+        -:  291:/* Checks if a char is upper case */
+function is_upper called 557558 returned 100% blocks executed 100%
+   557558:  292:int is_upper(char c) {
+   557558:  293:    if ('A' <= c && c <= 'Z') {
+   557558:  293-block  0
+branch  0 taken 379706 (fallthrough)
+branch  1 taken 177852
+   379706:  293-block  1
+branch  2 taken 27420 (fallthrough)
+branch  3 taken 352286
+    27420:  294:        return 1;
+    27420:  294-block  0
+        -:  295:    }
+   530138:  296:    return 0;
+   530138:  296-block  0
+        -:  297:}
+        -:  298:
+        -:  299:/* Checks if an action is legal */
+function legal_action called 69317 returned 100% blocks executed 100%
+    69317:  300:int legal_action(board_t board, move_t *move, char from_piece) {
+    69317:  301:    char from_colour = lower(from_piece);
+    69317:  301-block  0
+call    0 returned 69317
+        -:  302:    int dir;
+    69317:  303:    if (from_colour == CELL_WPIECE) {
+branch  0 taken 33128 (fallthrough)
+branch  1 taken 36189
+    33128:  304:        dir = +1;
+    33128:  304-block  0
+        -:  305:    } else {
+    36189:  306:        dir = -1;
+    36189:  306-block  0
+        -:  307:    }
+    69317:  308:    coord_t dist = get_dist(move);
+    69317:  308-block  0
+call    0 returned 69317
+    69317:  309:    char cap_piece = lower(
+    69317:  310:            board[move->from.row + dist.row / 2][move->from.col +
+    69317:  311:                                                 dist.col / 2]);
+call    0 returned 69317
+    69317:  312:    if (dist.row == dir && (abs(dist.col) == 1)) {
+branch  0 taken 23224 (fallthrough)
+branch  1 taken 46093
+    23224:  312-block  0
+branch  2 taken 23224 (fallthrough)
+branch  3 taken 0
+        -:  313:        /* Move is one cell diagonally */
+    23224:  314:        return 1;
+    23224:  314-block  0
+        -:  315:    }
+    46093:  316:    if (dist.row == dir * 2 && (abs(dist.col) == 2)) {
+    46093:  316-block  0
+branch  0 taken 19442 (fallthrough)
+branch  1 taken 26651
+    19442:  316-block  1
+branch  2 taken 19442 (fallthrough)
+branch  3 taken 0
+        -:  317:        /* Move is two cells diagonally */
+    19442:  318:        if (cap_piece != CELL_EMPTY && !same_colour(from_colour, cap_piece)) {
+    19442:  318-block  0
+branch  0 taken 9663 (fallthrough)
+branch  1 taken 9779
+     9663:  318-block  1
+call    2 returned 9663
+branch  3 taken 3381 (fallthrough)
+branch  4 taken 6282
+        -:  319:            /* Captured cell is not empty and captured piece is the other
+        -:  320:             * player's */
+     3381:  321:            return 1;
+     3381:  321-block  0
+        -:  322:        }
+        -:  323:    }
+    42712:  324:    if (is_upper(from_piece)) {
+    42712:  324-block  0
+call    0 returned 42712
+branch  1 taken 4157 (fallthrough)
+branch  2 taken 38555
+        -:  325:        //printf("yea\n");
+        -:  326:        /* Tower */
+     4157:  327:        if (dist.row == -dir && (abs(dist.col) == 1)) {
+     4157:  327-block  0
+branch  0 taken 1752 (fallthrough)
+branch  1 taken 2405
+     1752:  327-block  1
+branch  2 taken 1752 (fallthrough)
+branch  3 taken 0
+        -:  328:            /* Move is one cell diagonally */
+     1752:  329:            return 1;
+     1752:  329-block  0
+        -:  330:        }
+     2405:  331:        if (dist.row == -dir * 2 && (abs(dist.col) == 2)) {
+     2405:  331-block  0
+branch  0 taken 903 (fallthrough)
+branch  1 taken 1502
+      903:  331-block  1
+branch  2 taken 903 (fallthrough)
+branch  3 taken 0
+        -:  332:            /* Move is two cells diagonally */
+     1119:  333:            if (cap_piece != CELL_EMPTY &&
+      903:  333-block  0
+branch  0 taken 216 (fallthrough)
+branch  1 taken 687
+branch  2 taken 146 (fallthrough)
+branch  3 taken 70
+      216:  334:                !same_colour(from_colour, cap_piece)) {
+      216:  334-block  0
+call    0 returned 216
+        -:  335:                /* Captured cell is not empty and captured piece is the other
+        -:  336:                 * player's */
+      146:  337:                return 1;
+      146:  337-block  0
+        -:  338:            }
+        -:  339:        }
+        -:  340:    }
+    40814:  341:    return 0;
+    40814:  341-block  0
+        -:  342:}
+        -:  343:
+        -:  344:/* Gets the distance between two cells */
+function get_dist called 97858 returned 100% blocks executed 100%
+    97858:  345:coord_t get_dist(move_t *move) {
+        -:  346:    coord_t dist;
+    97858:  347:    dist.row = move->to.row - move->from.row;
+    97858:  348:    dist.col = move->to.col - move->from.col;
+    97858:  349:    return dist;
+    97858:  349-block  0
+        -:  350:}
+        -:  351:
+        -:  352:/* Updates the board after a move has taken place */
+function update_board called 28541 returned 100% blocks executed 100%
+    28541:  353:void update_board(board_t board, move_t *move) {
+    28541:  354:    coord_t dist = get_dist(move);
+    28541:  354-block  0
+call    0 returned 28541
+    28541:  355:    char moved_piece = board[move->from.row][move->from.col];
+        -:  356:
+        -:  357:    /* 'To' cell takes value of 'from' cell */
+    29222:  358:    if ((move->to.row == BOARD_SIZE - 1 || move->to.row == 0) &&
+branch  0 taken 28414 (fallthrough)
+branch  1 taken 127
+    28414:  358-block  0
+branch  2 taken 554 (fallthrough)
+branch  3 taken 27860
+branch  4 taken 241 (fallthrough)
+branch  5 taken 440
+      681:  359:        !is_upper(moved_piece)) {
+      681:  359-block  0
+call    0 returned 681
+        -:  360:        /* Normal piece becomes a tower piece */
+      241:  361:        board[move->to.row][move->to.col] = upper(
+      241:  362:                board[move->from.row][move->from.col]);
+      241:  362-block  0
+call    0 returned 241
+        -:  363:    } else {
+        -:  364:        /* Still a normal piece */
+    28300:  365:        board[move->to.row][move->to.col] = board[move->from.row][move->from.col];
+    28300:  365-block  0
+        -:  366:    }
+        -:  367:
+        -:  368:    /* Set 'from' cell to empty */
+    28541:  369:    board[move->from.row][move->from.col] = CELL_EMPTY;
+        -:  370:    //printf("at update board: %d %d %d %d\n", move->from.row, move->from.col, move->to.row, move->to.col);
+        -:  371:    //printf("dist?? %d %d\n", dist.row, dist.col);
+    28541:  372:    if (abs(dist.row) > 1) {
+    28541:  372-block  0
+branch  0 taken 3537 (fallthrough)
+branch  1 taken 25004
+        -:  373:        /* Make captured cell empty */
+     3537:  374:        board[move->from.row + dist.row / 2][move->from.col +
+     3537:  375:                                             dist.col / 2] = CELL_EMPTY;
+     3537:  375-block  0
+        -:  376:    }
+    28541:  377:}
+        -:  378:
+function get_cost called 28591 returned 100% blocks executed 100%
+    28591:  379:int get_cost(board_t board) {
+    28591:  380:    int cost = 0;
+        -:  381:
+   257319:  382:    for (int row = 0; row < BOARD_SIZE; row++) {
+    28591:  382-block  0
+   228728:  382-block  1
+   257319:  382-block  2
+branch  0 taken 228728
+branch  1 taken 28591 (fallthrough)
+  2058552:  383:        for (int col = 0; col < BOARD_SIZE; col++) {
+   228728:  383-block  0
+  1829824:  383-block  1
+  2058552:  383-block  2
+branch  0 taken 1829824
+branch  1 taken 228728 (fallthrough)
+  1829824:  384:            if (board[row][col] == CELL_EMPTY) {
+  1829824:  384-block  0
+branch  0 taken 1365568 (fallthrough)
+branch  1 taken 464256
+  1365568:  385:                continue;
+  1365568:  385-block  0
+   464256:  386:            } else if (board[row][col] == CELL_WPIECE) {
+   464256:  386-block  0
+branch  0 taken 187929 (fallthrough)
+branch  1 taken 276327
+   187929:  387:                cost -= COST_PIECE;
+   187929:  387-block  0
+   276327:  388:            } else if (board[row][col] == CELL_BPIECE) {
+   276327:  388-block  0
+branch  0 taken 242417 (fallthrough)
+branch  1 taken 33910
+   242417:  389:                cost += COST_PIECE;
+   242417:  389-block  0
+    33910:  390:            } else if (board[row][col] == CELL_WTOWER) {
+    33910:  390-block  0
+branch  0 taken 340 (fallthrough)
+branch  1 taken 33570
+      340:  391:                cost -= COST_TOWER;
+      340:  391-block  0
+        -:  392:            } else {
+    33570:  393:                cost += COST_TOWER;
+    33570:  393-block  0
+        -:  394:            }
+        -:  395:        }
+        -:  396:    }
+    28591:  397:    return cost;
+    28591:  397-block  0
+        -:  398:}
+        -:  399:
+function check_win called 0 returned 0% blocks executed 0%
+    #####:  400:int check_win(board_t board, char cur_turn) {
+        -:  401:    move_ary psbl_mvs;
+    #####:  402:    int piece_found = FALSE;
+    #####:  403:    int valid_mv_found = FALSE;
+    #####:  404:    for (int row = 0; row < BOARD_SIZE; row++) {
+    %%%%%:  404-block  0
+    %%%%%:  404-block  1
+    %%%%%:  404-block  2
+branch  0 never executed
+branch  1 never executed
+    #####:  405:        for (int col = 0; col < BOARD_SIZE; col++) {
+    %%%%%:  405-block  0
+    %%%%%:  405-block  1
+    %%%%%:  405-block  2
+branch  0 never executed
+branch  1 never executed
+    #####:  406:            if (lower(board[row][col]) == switch_colour(cur_turn)) {
+    %%%%%:  406-block  0
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  407:                piece_found = TRUE;
+    %%%%%:  407-block  0
+        -:  408:            }
+    #####:  409:            if (lower(board[row][col]) == cur_turn) {
+    %%%%%:  409-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  410:                /* Get possible moves */
+    #####:  411:                psbl_mvs = get_moves(row, col);
+    %%%%%:  411-block  0
+call    0 never executed
+    #####:  412:                for (int i = 0; i < MAX_MOVES; i++) {
+    %%%%%:  412-block  0
+    %%%%%:  412-block  1
+branch  0 never executed
+branch  1 never executed
+    #####:  413:                    if (move_valid(board, &psbl_mvs.moves[i],
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  414:                                   switch_colour(cur_turn), TRUE)) {
+    %%%%%:  414-block  0
+call    0 never executed
+    #####:  415:                        valid_mv_found = TRUE;
+    %%%%%:  415-block  0
+        -:  416:                    }
+        -:  417:                }
+        -:  418:            }
+        -:  419:        }
+        -:  420:    }
+    #####:  421:    if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
+    %%%%%:  421-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  421-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  422:        /* Winning condition */
+    #####:  423:        if (cur_turn == CELL_WPIECE) {
+    %%%%%:  423-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  424:            return 1;
+    %%%%%:  424-block  0
+        -:  425:        } else {
+    #####:  426:            return 2;
+    %%%%%:  426-block  0
+        -:  427:        }
+        -:  428:    }
+    #####:  429:    return 0;
+    %%%%%:  429-block  0
+        -:  430:}
+        -:  431:
+        -:  432:
+        -:  433:/* Adds padding to output */
+function pad called 630 returned 100% blocks executed 100%
+      630:  434:            void pad() {
+      630:  435:                printf("   ");
+      630:  435-block  0
+call    0 returned 630
+      630:  436:            }
+        -:  437:
+        -:  438:/* Adds newline to output */
+function newline called 1134 returned 100% blocks executed 100%
+     1134:  439:            void newline() {
+     1134:  440:                printf("\n");
+     1134:  440-block  0
+call    0 returned 1134
+     1134:  441:            }
