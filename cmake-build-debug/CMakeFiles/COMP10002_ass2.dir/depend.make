@@ -10,6 +10,3 @@ CMakeFiles\COMP10002_ass2.dir\stage0.c.obj: ..\stage0.c
 CMakeFiles\COMP10002_ass2.dir\stage1.c.obj: ..\ass2.h
 CMakeFiles\COMP10002_ass2.dir\stage1.c.obj: ..\stage1.c
 
-CMakeFiles\COMP10002_ass2.dir\stage2.c.obj: ..\ass2.h
-CMakeFiles\COMP10002_ass2.dir\stage2.c.obj: ..\stage2.c
-

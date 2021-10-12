@@ -9,15 +9,7 @@ void do_stage1(board_t board, nxt_act_t *nxt_act) {
      * state of the game where the previous player had just played */
     root = init_root(board, switch_colour(nxt_act->prev_turn));
     // calculate possible moves and loop through them to run build tree
-//    printf("prev_turn: %c", prev_turn);
-//    move_ary psbl_mvs = get_moves(5, 2);
-//    for (int i = 0; i < MAX_MOVES; i++) {
-//        prt_move(psbl_mvs.moves[i]);
-//        if (move_valid(root->board, &psbl_mvs.moves[i], prev_turn,
-//                       TRUE)) {
-//            printf("valid\n");
-//        }
-//    }
+
 
     build_tree(root, 1);
 
@@ -26,8 +18,8 @@ void do_stage1(board_t board, nxt_act_t *nxt_act) {
     free_tree(root);
 
     update_board(board, &cam.move);
-
-    prt_inb(board, nxt_act, &cam.move, get_cost(board), TRUE);
+    //TODO: optimise to just use pre calculated stuff in tree
+    prt_inb(board, nxt_act, &cam.move, TRUE);
 
     nxt_act->num_turns++;
 }
@@ -41,18 +33,18 @@ void build_tree(state_t *parent, int depth) {
         char prev_turn = switch_colour(parent->cur_turn);
         state_t *new;
         move_ary psbl_mvs;
-//        int piece_found = FALSE;
-//        int valid_mv_found = FALSE;
+        int piece_found = FALSE;
+        int valid_mv_found = FALSE;
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 if (lower(parent->board[row][col]) == parent->cur_turn) {
-//                    piece_found = TRUE;
+                    piece_found = TRUE;
                     /* Get possible moves */
                     psbl_mvs = get_moves(row, col);
                     for (int i = 0; i < MAX_MOVES; i++) {
                         if (move_valid(parent->board, &psbl_mvs.moves[i], prev_turn,
                                        TRUE)) {
-//                            valid_mv_found = TRUE;
+                            valid_mv_found = TRUE;
                             // malloc new data, update data
                             new = new_child(parent->board, &psbl_mvs.moves[i],
                                             parent->cur_turn);
@@ -66,14 +58,14 @@ void build_tree(state_t *parent, int depth) {
                 }
             }
         }
-//        if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
-//            /* Winning condition */
-//            if (parent->cur_turn == CELL_WPIECE) {
-//                parent->cost = INT_MIN;
-//            } else {
-//                parent->cost = INT_MAX;
-//            }
-//        }
+        if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
+            /* Winning condition */
+            if (parent->cur_turn == CELL_WPIECE) {
+                parent->cost = INT_MAX;
+            } else {
+                parent->cost = INT_MIN;
+            }
+        }
     }
 }
 
@@ -103,7 +95,7 @@ void free_tree(state_t *parent) {
 
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
     state_t *new;
-    new = (state_t *) malloc(sizeof(state_t));
+    new = (state_t *) malloc(sizeof(*new));
     assert(new != NULL);
     board_cpy(prev_board, new->board);
     update_board(new->board, move);
@@ -137,7 +129,7 @@ state_t *init_root(board_t board, char cur_turn) {
     assert(root != NULL);
     //TODO: remember to have assertions. Disclose I used alistair's programs?
     board_cpy(board, root->board);
-    root->cost = get_cost(board );
+    root->cost = get_cost(board);
     root->cur_turn = cur_turn;
     root->child_hdl = new_handle();
     root->move.from.row = -1;
@@ -178,7 +170,7 @@ cam_t backprop_cost(state_t *state, char order) {
         cam_t temp_cam;
         /* pointer to the first next element in the list */
         lst_node_t *next_elem = state->child_hdl->head->next;
-        while (next_elem != NULL) {
+        while (next_elem != NULL) { //TODO: could use for loop here?
             temp_cam = backprop_cost(next_elem->data, switch_colour(order));
             if (order == CELL_WPIECE) {
                 /* Minimise cost, Update cam with lower cost */

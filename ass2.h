@@ -130,7 +130,7 @@ void prt_board(board_t board);
 void prt_from_input(board_t board, nxt_act_t *nxt_act);
 
 void
-prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int cost, int is_s1);
+prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int is_s1);
 
 int move_valid(board_t board, move_t *move, char prev_turn, int not_exit);
 
@@ -154,7 +154,7 @@ void update_board(board_t board, move_t *move);
 
 int get_cost(board_t board);
 
-int check_win(board_t board, char cur_turn);
+int has_won(board_t board, char nxt_turn);
 
 move_ary get_moves(int row, int col);
 

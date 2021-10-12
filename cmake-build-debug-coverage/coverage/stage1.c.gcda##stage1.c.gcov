@@ -1,0 +1,479 @@
+        -:    0:Source:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/stage1.c
+        -:    0:Graph:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/CMakeFiles/COMP10002_ass2.dir/stage1.c.gcno
+        -:    0:Data:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/CMakeFiles/COMP10002_ass2.dir/stage1.c.gcda
+        -:    0:Runs:1
+        -:    1:#include "ass2.h"
+        -:    2:
+        -:    3:/* Stage 1 */
+function do_stage1 called 50 returned 100% blocks executed 100%
+       50:    4:void do_stage1(board_t board, nxt_act_t *nxt_act) {
+        -:    5:    // TODO: if prev_turn == '\0' make it black?
+        -:    6:    /* initialise root */
+        -:    7:    state_t *root;
+        -:    8:    /* Insert previous prev_turn into root because the root is the built from the
+        -:    9:     * state of the game where the previous player had just played */
+       50:   10:    root = init_root(board, switch_colour(nxt_act->prev_turn));
+       50:   10-block  0
+call    0 returned 50
+call    1 returned 50
+        -:   11:    // calculate possible moves and loop through them to run build tree
+        -:   12://    printf("prev_turn: %c", prev_turn);
+        -:   13://    move_ary psbl_mvs = get_moves(5, 2);
+        -:   14://    for (int i = 0; i < MAX_MOVES; i++) {
+        -:   15://        prt_move(psbl_mvs.moves[i]);
+        -:   16://        if (move_valid(root->board, &psbl_mvs.moves[i], prev_turn,
+        -:   17://                       TRUE)) {
+        -:   18://            printf("valid\n");
+        -:   19://        }
+        -:   20://    }
+        -:   21:
+       50:   22:    build_tree(root, 1);
+call    0 returned 50
+        -:   23:
+       50:   24:    cam_t cam = backprop_cost(root, root->cur_turn);
+call    0 returned 50
+        -:   25:
+       50:   26:    free_tree(root);
+call    0 returned 50
+        -:   27:
+       50:   28:    update_board(board, &cam.move);
+call    0 returned 50
+        -:   29:
+       50:   30:    prt_inb(board, nxt_act, &cam.move, get_cost(board), TRUE);
+call    0 returned 50
+call    1 returned 50
+        -:   31:
+       50:   32:    nxt_act->num_turns++;
+       50:   33:}
+        -:   34:
+        -:   35:
+function build_tree called 28529 returned 100% blocks executed 100%
+    28529:   36:void build_tree(state_t *parent, int depth) {
+    28529:   37:    if (depth > TREE_DEPTH) {
+    28529:   37-block  0
+branch  0 taken 25140 (fallthrough)
+branch  1 taken 3389
+        -:   38:        /* Base case */
+    25140:   39:        return;
+    25140:   39-block  0
+        -:   40:    } else {
+     3389:   41:        char prev_turn = switch_colour(parent->cur_turn);
+     3389:   41-block  0
+call    0 returned 3389
+        -:   42:        state_t *new;
+        -:   43:        move_ary psbl_mvs;
+        -:   44://        int piece_found = FALSE;
+        -:   45://        int valid_mv_found = FALSE;
+    30501:   46:        for (int row = 0; row < BOARD_SIZE; row++) {
+    27112:   46-block  0
+    30501:   46-block  1
+branch  0 taken 27112
+branch  1 taken 3389 (fallthrough)
+   244008:   47:            for (int col = 0; col < BOARD_SIZE; col++) {
+    27112:   47-block  0
+   216896:   47-block  1
+   244008:   47-block  2
+branch  0 taken 216896
+branch  1 taken 27112 (fallthrough)
+   216896:   48:                if (lower(parent->board[row][col]) == parent->cur_turn) {
+   216896:   48-block  0
+call    0 returned 216896
+branch  1 taken 26272 (fallthrough)
+branch  2 taken 190624
+        -:   49://                    piece_found = TRUE;
+        -:   50:                    /* Get possible moves */
+    26272:   51:                    psbl_mvs = get_moves(row, col);
+    26272:   51-block  0
+call    0 returned 26272
+   236448:   52:                    for (int i = 0; i < MAX_MOVES; i++) {
+   210176:   52-block  0
+   236448:   52-block  1
+branch  0 taken 210176
+branch  1 taken 26272 (fallthrough)
+   210176:   53:                        if (move_valid(parent->board, &psbl_mvs.moves[i], prev_turn,
+   210176:   53-block  0
+call    0 returned 210176
+branch  1 taken 28479 (fallthrough)
+branch  2 taken 181697
+        -:   54:                                       TRUE)) {
+        -:   55://                            valid_mv_found = TRUE;
+        -:   56:                            // malloc new data, update data
+    28479:   57:                            new = new_child(parent->board, &psbl_mvs.moves[i],
+    28479:   58:                                            parent->cur_turn);
+    28479:   58-block  0
+call    0 returned 28479
+    28479:   59:                            new->depth = depth;
+        -:   60:                            // insert into child handle list
+    28479:   61:                            insert_child(parent->child_hdl, new);
+call    0 returned 28479
+        -:   62:                            // run recursive function on the new child
+    28479:   63:                            build_tree(new, depth + 1);
+call    0 returned 28479
+        -:   64:                        }
+        -:   65:                    }
+        -:   66:                }
+        -:   67:            }
+        -:   68:        }
+        -:   69://        if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
+        -:   70://            /* Winning condition */
+        -:   71://            if (parent->cur_turn == CELL_WPIECE) {
+        -:   72://                parent->cost = INT_MIN;
+        -:   73://            } else {
+        -:   74://                parent->cost = INT_MAX;
+        -:   75://            }
+        -:   76://        }
+        -:   77:    }
+        -:   78:}
+        -:   79:
+function free_tree called 28529 returned 100% blocks executed 83%
+    28529:   80:void free_tree(state_t *parent) {
+   28529*:   81:    assert(parent != NULL);
+    28529:   81-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 28529
+    %%%%%:   81-block  1
+call    2 never executed
+    28529:   82:    if (parent->child_hdl->head == NULL) {
+    28529:   82-block  0
+branch  0 taken 25188 (fallthrough)
+branch  1 taken 3341
+        -:   83:        /* Base case - no more children to free. */
+    25188:   84:        free(parent->child_hdl);
+    25188:   85:        free(parent);
+    25188:   86:        return;
+    25188:   86-block  0
+        -:   87:    } else {
+        -:   88:        /* Loop through children and free them. This section is structured
+        -:   89:         * similarly to Alistair's code */
+    3341*:   90:        assert(parent->child_hdl != NULL);
+     3341:   90-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3341
+    %%%%%:   90-block  1
+call    2 never executed
+        -:   91:        lst_node_t *curr, *prev;
+     3341:   92:        curr = parent->child_hdl->head;
+    31820:   93:        while (curr) {
+     3341:   93-block  0
+    31820:   93-block  1
+branch  0 taken 28479
+branch  1 taken 3341 (fallthrough)
+    28479:   94:            prev = curr;
+    28479:   95:            curr = curr->next;
+    28479:   96:            free_tree(prev->data);
+    28479:   96-block  0
+call    0 returned 28479
+    28479:   97:            free(prev);
+        -:   98:        }
+     3341:   99:        free(parent->child_hdl);
+     3341:  100:        free(parent);
+     3341:  100-block  0
+        -:  101:    }
+        -:  102:}
+        -:  103:
+function new_child called 28479 returned 100% blocks executed 90%
+    28479:  104:state_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
+        -:  105:    state_t *new;
+    28479:  106:    new = (state_t *) malloc(sizeof(state_t));
+   28479*:  107:    assert(new != NULL);
+    28479:  107-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 28479
+    %%%%%:  107-block  1
+call    2 never executed
+    28479:  108:    board_cpy(prev_board, new->board);
+    28479:  108-block  0
+call    0 returned 28479
+    28479:  109:    update_board(new->board, move);
+call    0 returned 28479
+    28479:  110:    new->cost = get_cost(new->board);
+call    0 returned 28479
+    28479:  111:    move_cpy(move, &new->move);
+call    0 returned 28479
+    28479:  112:    new->cur_turn = switch_colour(prev_turn);
+call    0 returned 28479
+    28479:  113:    new->child_hdl = new_handle();
+call    0 returned 28479
+    28479:  114:    return new;
+        -:  115:}
+        -:  116:
+function insert_child called 28479 returned 100% blocks executed 75%
+    28479:  117:void insert_child(lst_t *handle, state_t *data) {
+   28479*:  118:    assert(handle != NULL);
+    28479:  118-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 28479
+    %%%%%:  118-block  1
+call    2 never executed
+        -:  119:    lst_node_t *new;
+    28479:  120:    new = (lst_node_t *) malloc(sizeof(lst_node_t));
+   28479*:  121:    assert(new != NULL);
+    28479:  121-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 28479
+    %%%%%:  121-block  1
+call    2 never executed
+    28479:  122:    new->next = NULL;
+    28479:  123:    new->data = data;
+        -:  124:
+    28479:  125:    if (handle->foot == NULL) {
+    28479:  125-block  0
+branch  0 taken 3341 (fallthrough)
+branch  1 taken 25138
+        -:  126:        /* First insertion */
+     3341:  127:        handle->head = handle->foot = new;
+     3341:  127-block  0
+        -:  128:    } else {
+    25138:  129:        handle->foot->next = new;
+    25138:  130:        handle->foot = new;
+    25138:  130-block  0
+        -:  131:    }
+    28479:  132:}
+        -:  133:
+function init_root called 50 returned 100% blocks executed 86%
+       50:  134:state_t *init_root(board_t board, char cur_turn) {
+        -:  135:    state_t *root;
+       50:  136:    root = (state_t *) malloc(sizeof(state_t));
+      50*:  137:    assert(root != NULL);
+       50:  137-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 50
+    %%%%%:  137-block  1
+call    2 never executed
+        -:  138:    //TODO: remember to have assertions. Disclose I used alistair's programs?
+       50:  139:    board_cpy(board, root->board);
+       50:  139-block  0
+call    0 returned 50
+       50:  140:    root->cost = get_cost(board );
+call    0 returned 50
+       50:  141:    root->cur_turn = cur_turn;
+       50:  142:    root->child_hdl = new_handle();
+call    0 returned 50
+       50:  143:    root->move.from.row = -1;
+       50:  144:    root->depth = 0;
+       50:  145:    return root;
+        -:  146:}
+        -:  147:
+function new_handle called 28529 returned 100% blocks executed 75%
+    28529:  148:lst_t *new_handle() {
+        -:  149:    lst_t *handle;
+    28529:  150:    handle = (lst_t *) malloc(sizeof(lst_t));
+   28529*:  151:    assert(handle!=NULL);
+    28529:  151-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 28529
+    %%%%%:  151-block  1
+call    2 never executed
+    28529:  152:    handle->head = handle->foot = NULL;
+    28529:  153:    return handle;
+    28529:  153-block  0
+        -:  154:}
+        -:  155:
+        -:  156:
+function backprop_cost called 28529 returned 100% blocks executed 100%
+    28529:  157:cam_t backprop_cost(state_t *state, char order) {
+        -:  158:    cam_t cam;
+    28529:  159:    if (state->child_hdl->head == NULL) {
+    28529:  159-block  0
+branch  0 taken 25188 (fallthrough)
+branch  1 taken 3341
+        -:  160:        /* Leaf node, no more children, base case. Return cost of current
+        -:  161:         * leaf node*/
+    25188:  162:        cam.cost = state->cost;
+    25188:  163:        cam.move = state->move;
+    25188:  164:        cam.depth = state->depth;
+    25188:  164-block  0
+        -:  165:    } else {
+        -:  166:        /* Recursive case. Return max or min cost of child states */
+     3341:  167:        cam = backprop_cost(state->child_hdl->head->data, switch_colour(order));
+     3341:  167-block  0
+call    0 returned 3341
+call    1 returned 3341
+     3341:  168:        if (state->move.from.row != -1) {
+branch  0 taken 3293 (fallthrough)
+branch  1 taken 48
+        -:  169:            /* If current state is not the root, return the move and depth of
+        -:  170:             * the current state */
+     3293:  171:            cam.move = state->move;
+     3293:  171-block  0
+        -:  172:            //cam.depth = state->depth;
+        -:  173:        } else {
+        -:  174:            /* The current state is the root. Return the move of the min/max
+        -:  175:             * cost child state */
+       48:  176:            cam.move = state->child_hdl->head->data->move;
+       48:  176-block  0
+        -:  177:        }
+        -:  178:        cam_t temp_cam;
+        -:  179:        /* pointer to the first next element in the list */
+     3341:  180:        lst_node_t *next_elem = state->child_hdl->head->next;
+    28479:  181:        while (next_elem != NULL) {
+     3341:  181-block  0
+    28479:  181-block  1
+branch  0 taken 25138
+branch  1 taken 3341 (fallthrough)
+    25138:  182:            temp_cam = backprop_cost(next_elem->data, switch_colour(order));
+    25138:  182-block  0
+call    0 returned 25138
+call    1 returned 25138
+    25138:  183:            if (order == CELL_WPIECE) {
+branch  0 taken 9447 (fallthrough)
+branch  1 taken 15691
+        -:  184:                /* Minimise cost, Update cam with lower cost */
+     9447:  185:                if (cam.cost > temp_cam.cost) {
+     9447:  185-block  0
+branch  0 taken 1008 (fallthrough)
+branch  1 taken 8439
+     1008:  186:                    cam.cost = temp_cam.cost;
+     1008:  187:                    cam.depth = temp_cam.depth;
+     1008:  188:                    if (state->move.from.row != -1) {
+     1008:  188-block  0
+branch  0 taken 996 (fallthrough)
+branch  1 taken 12
+      996:  189:                        cam.move = state->move;
+      996:  189-block  0
+        -:  190:                    } else {
+       12:  191:                        cam.move = next_elem->data->move;
+       12:  191-block  0
+        -:  192:                    }
+        -:  193:                }
+        -:  194:            } else {
+        -:  195:                /* Maximise cost */
+    15691:  196:                if (cam.cost < temp_cam.cost) {
+    15691:  196-block  0
+branch  0 taken 768 (fallthrough)
+branch  1 taken 14923
+      768:  197:                    cam.cost = temp_cam.cost;
+      768:  198:                    cam.depth = temp_cam.depth;
+      768:  199:                    if (state->move.from.row != -1) {
+      768:  199-block  0
+branch  0 taken 752 (fallthrough)
+branch  1 taken 16
+      752:  200:                        cam.move = state->move;
+      752:  200-block  0
+        -:  201:                    } else {
+       16:  202:                        cam.move = next_elem->data->move;
+       16:  202-block  0
+        -:  203:                    }
+        -:  204:                }
+        -:  205:            }
+    25138:  206:            next_elem = next_elem->next;
+    25138:  206-block  0
+        -:  207:        }
+        -:  208:    }
+    28529:  209:    return cam;
+    28529:  209-block  0
+        -:  210:}
+        -:  211:
+        -:  212:
+function prt_move called 62 returned 100% blocks executed 100%
+       62:  213:void prt_move(move_t *move) {
+        -:  214:    char m1, m2, m3, m4;
+       62:  215:    m1 = move->from.col + 'A';
+       62:  216:    m2 = move->from.row + '0' + 1;
+       62:  217:    m3 = move->to.col + 'A';
+       62:  218:    m4 = move->to.row + '0' + 1;
+       62:  219:    printf("%c%c-%c%c\n", m1, m2, m3, m4);
+       62:  219-block  0
+call    0 returned 62
+        -:  220://    printf("col-row: %d,%d-%d,%d\n", move.from.col, move.from.row,
+        -:  221://           move.to.col, move.to.row );
+       62:  222:}
+        -:  223:
+        -:  224:/* Copies the contents of one board onto another */
+function board_cpy called 28529 returned 100% blocks executed 100%
+    28529:  225:void board_cpy(board_t orig, board_t new) {
+   256761:  226:    for (int row = 0; row < BOARD_SIZE; row++) {
+    28529:  226-block  0
+   228232:  226-block  1
+   256761:  226-block  2
+branch  0 taken 228232
+branch  1 taken 28529 (fallthrough)
+  2054088:  227:        for (int col = 0; col < BOARD_SIZE; col++) {
+   228232:  227-block  0
+  2054088:  227-block  1
+branch  0 taken 1825856
+branch  1 taken 228232 (fallthrough)
+  1825856:  228:            new[row][col] = orig[row][col];
+  1825856:  228-block  0
+        -:  229:        }
+        -:  230:    }
+    28529:  231:}
+        -:  232:
+function move_cpy called 28479 returned 100% blocks executed 100%
+    28479:  233:void move_cpy(move_t *orig, move_t *new) {
+    28479:  234:    new->to = orig->to;
+    28479:  235:    new->from = orig->from;
+    28479:  236:}
+        -:  237:
+function switch_colour called 60459 returned 100% blocks executed 100%
+    60459:  238:char switch_colour(char orig) {
+        -:  239:    char new;
+    60459:  240:    if (orig == CELL_WPIECE) {
+    60459:  240-block  0
+branch  0 taken 24125 (fallthrough)
+branch  1 taken 36334
+    24125:  241:        new = CELL_BPIECE;
+    24125:  241-block  0
+        -:  242:    } else {
+    36334:  243:        new = CELL_WPIECE;
+    36334:  243-block  0
+        -:  244:    }
+    60459:  245:    return new;
+    60459:  245-block  0
+        -:  246:}
+        -:  247:
+function get_moves called 26272 returned 100% blocks executed 100%
+    26272:  248:move_ary get_moves(int row, int col) {
+        -:  249:    move_ary new;
+   236448:  250:    for (int i = 0; i < MAX_MOVES; i++) {
+    26272:  250-block  0
+   236448:  250-block  1
+branch  0 taken 210176
+branch  1 taken 26272 (fallthrough)
+   210176:  251:        new.moves[i].from.row = row;
+   210176:  252:        new.moves[i].from.col = col;
+   210176:  252-block  0
+        -:  253:    }
+    78816:  254:    for (int i = 0; i < 2; i++) {
+    26272:  254-block  0
+    78816:  254-block  1
+branch  0 taken 52544
+branch  1 taken 26272 (fallthrough)
+        -:  255:        /* NE */
+    52544:  256:        new.moves[0 + i].to.row = row - (i + 1);
+    52544:  257:        new.moves[0 + i].to.col = col + (i + 1);
+    52544:  257-block  0
+        -:  258:    }
+    78816:  259:    for (int i = 0; i < 2; i++) {
+    26272:  259-block  0
+    78816:  259-block  1
+branch  0 taken 52544
+branch  1 taken 26272 (fallthrough)
+        -:  260:        /* SE */
+    52544:  261:        new.moves[2 + i].to.row = row + (i + 1);
+    52544:  262:        new.moves[2 + i].to.col = col + (i + 1);
+    52544:  262-block  0
+        -:  263:    }
+    78816:  264:    for (int i = 0; i < 2; i++) {
+    26272:  264-block  0
+    78816:  264-block  1
+branch  0 taken 52544
+branch  1 taken 26272 (fallthrough)
+        -:  265:        /* SW */
+    52544:  266:        new.moves[4 + i].to.row = row + (i + 1);
+    52544:  267:        new.moves[4 + i].to.col = col - (i + 1);
+    52544:  267-block  0
+        -:  268:    }
+    78816:  269:    for (int i = 0; i < 2; i++) {
+    26272:  269-block  0
+    78816:  269-block  1
+branch  0 taken 52544
+branch  1 taken 26272 (fallthrough)
+        -:  270:        /* NW */
+    52544:  271:        new.moves[6 + i].to.row = row - (i + 1);
+    52544:  272:        new.moves[6 + i].to.col = col - (i + 1);
+    52544:  272-block  0
+        -:  273:    }
+    26272:  274:    return new;
+    26272:  274-block  0
+        -:  275:}

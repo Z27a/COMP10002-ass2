@@ -1,0 +1,51 @@
+        -:    0:Source:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/main.c
+        -:    0:Graph:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/CMakeFiles/COMP10002_ass2.dir/main.c.gcno
+        -:    0:Data:/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/CMakeFiles/COMP10002_ass2.dir/main.c.gcda
+        -:    0:Runs:1
+        -:    1:#include "ass2.h"
+        -:    2:
+        -:    3:int
+function main called 1 returned 100% blocks executed 90%
+        1:    4:main(int argc, char *argv[]) {
+        -:    5:    //TODO: Add function separator lines after i've finished
+        -:    6:    // What if only input is A or P
+        -:    7:
+        -:    8:    // YOUR IMPLEMENTATION OF STAGES 0-2
+        -:    9:    board_t board;
+        -:   10:    nxt_act_t next;
+        1:   11:    next.num_turns = 1;
+        1:   12:    next.prev_turn = '\0';
+        -:   13:
+        1:   14:    do_stage0(board, &next);
+        1:   14-block  0
+call    0 returned 1
+        -:   15:
+        1:   16:    if (next.action == 1) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:   17:        do_stage1(board, &next);
+    %%%%%:   17-block  0
+call    0 never executed
+        1:   18:    } else if (next.action == 2) {
+        1:   18-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+       51:   19:        for (int i = 0; i < COMP_ACTIONS; i++) {
+        1:   19-block  0
+       51:   19-block  1
+branch  0 taken 50
+branch  1 taken 1 (fallthrough)
+       50:   20:            do_stage1(board, &next);
+       50:   20-block  0
+call    0 returned 50
+        -:   21:        }
+        -:   22:    } else {
+        -:   23:        /* check for winner */
+        -:   24:    }
+        -:   25:
+        -:   26:
+        1:   27:    return EXIT_SUCCESS;            // exit program with the success code
+        1:   27-block  0
+        -:   28:}
+        -:   29:
+        -:   30:/* THE END -------------------------------------------------------------------*/
