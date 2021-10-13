@@ -2,7 +2,9 @@
 
 /* Stage 1 */
 void do_stage1(board_t board, nxt_act_t *nxt_act) {
-    // TODO: if prev_turn == '\0' make it black?
+    if (nxt_act->prev_turn == '\0') {
+        nxt_act->prev_turn = CELL_WPIECE;
+    }
     /* initialise root */
     state_t *root;
     /* Insert previous prev_turn into root because the root is the built from the
@@ -19,7 +21,7 @@ void do_stage1(board_t board, nxt_act_t *nxt_act) {
 
     update_board(board, &cam.move);
     //TODO: optimise to just use pre calculated stuff in tree
-    prt_inb(board, nxt_act, &cam.move, TRUE);
+    prt_bd_inf(board, nxt_act, &cam.move, TRUE);
 
     nxt_act->num_turns++;
 }
@@ -37,7 +39,7 @@ void build_tree(state_t *parent, int depth) {
         int valid_mv_found = FALSE;
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
-                if (lower(parent->board[row][col]) == parent->cur_turn) {
+                if (same_colour(parent->board[row][col], parent->cur_turn)) {
                     piece_found = TRUE;
                     /* Get possible moves */
                     psbl_mvs = get_moves(row, col);
@@ -202,17 +204,6 @@ cam_t backprop_cost(state_t *state, char order) {
 }
 
 
-void prt_move(move_t *move) {
-    char m1, m2, m3, m4;
-    m1 = move->from.col + 'A';
-    m2 = move->from.row + '0' + 1;
-    m3 = move->to.col + 'A';
-    m4 = move->to.row + '0' + 1;
-    printf("%c%c-%c%c\n", m1, m2, m3, m4);
-//    printf("col-row: %d,%d-%d,%d\n", move.from.col, move.from.row,
-//           move.to.col, move.to.row );
-}
-
 /* Copies the contents of one board onto another */
 void board_cpy(board_t orig, board_t new) {
     for (int row = 0; row < BOARD_SIZE; row++) {
@@ -237,31 +228,4 @@ char switch_colour(char orig) {
     return new;
 }
 
-move_ary get_moves(int row, int col) {
-    move_ary new;
-    for (int i = 0; i < MAX_MOVES; i++) {
-        new.moves[i].from.row = row;
-        new.moves[i].from.col = col;
-    }
-    for (int i = 0; i < 2; i++) {
-        /* NE */
-        new.moves[0 + i].to.row = row - (i + 1);
-        new.moves[0 + i].to.col = col + (i + 1);
-    }
-    for (int i = 0; i < 2; i++) {
-        /* SE */
-        new.moves[2 + i].to.row = row + (i + 1);
-        new.moves[2 + i].to.col = col + (i + 1);
-    }
-    for (int i = 0; i < 2; i++) {
-        /* SW */
-        new.moves[4 + i].to.row = row + (i + 1);
-        new.moves[4 + i].to.col = col - (i + 1);
-    }
-    for (int i = 0; i < 2; i++) {
-        /* NW */
-        new.moves[6 + i].to.row = row - (i + 1);
-        new.moves[6 + i].to.col = col - (i + 1);
-    }
-    return new;
-}
+/* THE END -------------------------------------------------------------------*/
