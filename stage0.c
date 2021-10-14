@@ -5,30 +5,22 @@ void do_stage0(board_t board, nxt_act_t *nxt_act) {
 
     init_board(board);
 
-    /* Print initial board config and info */
-    printf("BOARD SIZE: %dx%d\n", BOARD_SIZE, BOARD_SIZE);
-    printf("#BLACK PIECES: %d\n",
-           NUM_PIECES); //TODO: #define these strings. Also use preincrement for off by one situations?
-    printf("#WHITE PIECES: %d\n", NUM_PIECES);
+    prt_starting_info();
+
     prt_board(board);
 
-    /* Read input and print out changes to board. Print errors if input is not
-     * valid */
-    prt_from_input(board, nxt_act);
+    read_and_prt(board, nxt_act);
 }
 
-
+/*----------------------------------------------------------------------------*/
 /* Loads the initial configuration into the board */
 void init_board(board_t board) {
-    /* Assumes that the top left cell is always white and white pieces go
-     * on the top of tbe board */
-
-    /* Loop through rows and add values */
+    /* Loop through rows to add values */
     int top, mid, btm;
 
     /* Top rows with white pieces */
     for (top = 0; top < ROWS_WITH_PIECES; top++) {
-        fill_pieces(((top + 1) % 2 == 0), top, board, CELL_WPIECE);
+        fill_pieces(((top + IND2ROW) % 2 == 0), top, board, CELL_WPIECE);
     }
     /* Middle rows with no pieces */
     for (mid = top; mid < BOARD_SIZE - ROWS_WITH_PIECES; mid++) {
@@ -38,11 +30,11 @@ void init_board(board_t board) {
     }
     /* Bottom rows with black pieces */
     for (btm = mid; btm < BOARD_SIZE; btm++) {
-        fill_pieces(((btm + 1) % 2 == 0), btm, board, CELL_BPIECE);
+        fill_pieces(((btm + IND2ROW) % 2 == 0), btm, board, CELL_BPIECE);
     }
 }
 
-
+/*----------------------------------------------------------------------------*/
 /* Fills in a row that contains pieces */
 void fill_pieces(int row_even, int row, board_t board, char piece) {
     int was_piece;
@@ -68,58 +60,79 @@ void fill_pieces(int row_even, int row, board_t board, char piece) {
     }
 }
 
+/*----------------------------------------------------------------------------*/
+/* Print initial game configuration info */
+void prt_starting_info() {
+    printf("BOARD SIZE: %dx%d\n", BOARD_SIZE, BOARD_SIZE);
+    printf("#BLACK PIECES: %d\n", NUM_PIECES);
+    printf("#WHITE PIECES: %d\n", NUM_PIECES);
+    /* Well, here's the #defined version:
+     *
+     - #define BDSZMSG "BOARD SIZE:"
+     - #define BPCEMSG "#BLACK PIECES:"
+     - #define WPCEMSG "#WHITE PIECES:"
+     - printf("%s%s%dx%d%s", BDSZMSG, SPACE, BOARD_SIZE, BOARD_SIZE, NEWLINE);
+     - printf("%s%s%d%s", BPCEMSG, SPACE, NUM_PIECES, NEWLINE);
+     - printf("%s%s%d%s", WPCEMSG, SPACE, NUM_PIECES, NEWLINE);
+     *
+     * but I think it's a lot less readable, and I hope I can convince you of
+     * that as well, so I won't be #defining some stuff in this assignment */
+}
 
+/*----------------------------------------------------------------------------*/
 /* Prints the board with formatting */
 void prt_board(board_t board) {
     /* Column letters */
-    pad();
+    printf("%s", PADDING);
     for (int col = 0; col < BOARD_SIZE; col++) {
-        printf("  %c", 'A' + col);
+        printf("%s%s%c", SPACE, SPACE, col + IND2COL);
         if (col + 1 < BOARD_SIZE) {
-            printf(" ");
+            printf("%s", SPACE);
         } else {
-            newline();
+            printf("%s", NEWLINE);
         }
     }
 
-    /* initial row separator */
-    pad();
-    printf("%s", ROW_SEP);
-    newline();
+    /* First row separator */
+    printf("%s%s%s", PADDING, ROW_SEP, NEWLINE);
 
     /* Rest of the rows */
     for (int row = 0; row < BOARD_SIZE; row++) {
         /* Row number */
-        printf(" %d ", row + 1);
+        printf("%s%d ", SPACE, row + IND2ROW);
 
         /* Board contents */
         for (int col = 0; col < BOARD_SIZE; col++) {
-            printf("%s %c ", COL_SEP, board[row][col]);
+            printf("%s%s%c ", COL_SEP, SPACE, board[row][col]);
             if (col + 1 == BOARD_SIZE) {
                 printf("%s", COL_SEP);
-                newline();
+                printf("%s", NEWLINE);
             }
         }
 
         /* Row separator */
-        pad();
-        printf("%s", ROW_SEP);
-        newline();
+        printf("%s%s%s", PADDING, ROW_SEP, NEWLINE);
     }
 }
 
-
+/*----------------------------------------------------------------------------*/
 /* Read moves and prints out the data of the board after each move. Prints
  * error messages if a move is invalid */
-void prt_from_input(board_t board, nxt_act_t *nxt_act) {
+void read_and_prt(board_t board, nxt_act_t *nxt_act) {
     char c1, c2, c3, c4;
     move_t move;
     int first_turn = TRUE;
 
     while (scanf("%c%c-%c%c\n", &c1, &c2, &c3, &c4) == 4) {
+        /* Assign values to move struct */
+        move.from.col = c1 - IND2COL;
+        move.from.row = atoi(&c2) - IND2ROW;
+        move.to.col = c3 - IND2COL;
+        move.to.row = atoi(&c4) - IND2ROW;
+
         /* Determine the initial value of prev_turn (inverse of first player) */
         if (first_turn) {
-            if (same_colour(board[c1 - 'A'][c2 - '0'], CELL_WPIECE)) {
+            if (same_colour(board[move.from.row][move.from.col], CELL_WPIECE)) {
                 nxt_act->prev_turn = CELL_BPIECE;
             } else {
                 nxt_act->prev_turn = CELL_WPIECE;
@@ -127,53 +140,47 @@ void prt_from_input(board_t board, nxt_act_t *nxt_act) {
             first_turn = FALSE;
         }
 
-        /* Assign values to move */
-        move.from.col = c1 - 'A'; //TODO: update the As and 0s with #defines
-        move.from.row = c2 - '0' - 1;
-        move.to.col = c3 - 'A';
-        move.to.row = c4 - '0' - 1;
-
-        /* Check if move is valid */
         move_valid(board, &move, nxt_act->prev_turn, FALSE);
-        /* Update board */
+
         update_board(board, &move);
-        /* Check for a winning state */
 
-        prt_inb(board, nxt_act, &move, FALSE);
+        prt_bd_inf(board, nxt_act, &move, FALSE);
 
-        (nxt_act->num_turns)++;
+        /* The turn has ended, increment num_turns */
+        nxt_act->num_turns++;
     }
-
-    if (c1 == 'A') {
-        nxt_act->action = 1;
-    } else if (c1 == 'P') {
-        nxt_act->action = 2;
-    } else {
-        nxt_act->action = 0;
+    /* No more moves are entered, determine the next instructions */
+    if (c1 == STAGE1CMD) {
+        nxt_act->is_stage1 = TRUE;
+    } else if (c1 != STAGE2CMD) {
+        exit(EXIT_SUCCESS);
     }
-    // TODO: Need to check if a player wins every time?
 }
 
-void
-prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int is_s1) {
-    int cost = get_cost(board);
-    /* Print board */
-    printf("=====================================\n");
-    if (is_s1) printf("*** ");
-    /* Update prev_turn */
+/*----------------------------------------------------------------------------*/
+/* Print the board and current game info */
+void prt_bd_inf(board_t board, nxt_act_t *nxt_act, move_t *move,
+                int is_stage1) {
+    /* Print all the required content */
+    printf("%s%s", BOARD_SEP, NEWLINE);
+
+    if (is_stage1) printf("%s%s", COMP_ACT_SIG, SPACE);
+
     if (nxt_act->prev_turn == CELL_WPIECE) {
-        printf("BLACK ACTION ");
+        printf("BLACK ACTION%s", SPACE);
     } else {
-        printf("WHITE ACTION ");
+        printf("WHITE ACTION%s", SPACE);
     }
 
+    printf("#%d:%s", nxt_act->num_turns, SPACE);
 
-    printf("#%d: ", nxt_act->num_turns);
     prt_move(move);
 
-    printf("BOARD COST: %d\n", cost);
+    printf("BOARD COST: %d\n", get_cost(board));
+
     prt_board(board);
 
+    /* Check for a winner. Print winner and exit if there is one */
     if (has_won(board, nxt_act->prev_turn)) {
         if (nxt_act->prev_turn == CELL_WPIECE) {
             printf("BLACK WIN!\n");
@@ -183,59 +190,67 @@ prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int is_s1) {
         exit(EXIT_SUCCESS);
     }
 
+    /* Update prev_turn now that a turn has ended */
     nxt_act->prev_turn = switch_colour(nxt_act->prev_turn);
 }
 
+/*----------------------------------------------------------------------------*/
+/* Prints all values of a move struct */
+void prt_move(move_t *move) {
+    char m1, m2, m3, m4;
+    m1 = move->from.col + IND2COL;
+    m2 = move->from.row + IND2ROW;
+    m3 = move->to.col + IND2COL;
+    m4 = move->to.row + IND2ROW;
+    printf("%c%d-%c%d\n", m1, m2, m3, m4);
+}
 
-/* Checks if a move is valid */
+/*----------------------------------------------------------------------------*/
+/* Checks if a move is valid.Can either return a bool or exit the program */
 int move_valid(board_t board, move_t *move, char prev_turn, int not_exit) {
     char from_piece = board[move->from.row][move->from.col];
 
     /* 1 Source cell is outside of the board. */
     if (outside_board(&(move->from))) {
-        //TODO: need to #define these errors?
-        if (not_exit) return 0;
-        printf("ERROR: Source cell is outside of the board.\n");
+        if (not_exit) return FALSE;
+        printf("%s%s", ERR1, NEWLINE);
         exit(EXIT_FAILURE);
     }
-
     /* 2 Target cell is outside of the board. */
     if (outside_board(&(move->to))) {
-        if (not_exit) return 0;
-        printf("ERROR: Target cell is outside of the board.\n");
+        if (not_exit) return FALSE;
+        printf("%s%s", ERR2, NEWLINE);
         exit(EXIT_FAILURE);
     }
-
     /* 3 Source cell is empty. */
     if (cell_empty(board, &(move->from))) {
-        if (not_exit) return 0;
-        printf("ERROR: Source cell is empty.\n");
+        if (not_exit) return FALSE;
+        printf("%s%s", ERR3, NEWLINE);
         exit(EXIT_FAILURE);
     }
-
     /* 4 Target cell is not empty. */
     if (!cell_empty(board, &(move->to))) {
-        if (not_exit) return 0;
-        printf("ERROR: Target cell is not empty.\n");
+        if (not_exit) return FALSE;
+        printf("%s%s", ERR4, NEWLINE);
         exit(EXIT_FAILURE);
     }
-
     /* 5 Source cell holds opponent’s piece/tower. */
     if (same_colour(prev_turn, from_piece)) {
-        if (not_exit) return 0;
-        printf("ERROR: Source cell holds opponent's piece/tower.\n");
+        if (not_exit) return FALSE;
+        printf("%s%s", ERR5, NEWLINE);
         exit(EXIT_FAILURE);
     }
-
     /* 6 Illegal action. */
     if (!legal_action(board, move, from_piece)) {
-        if (not_exit) return 0;
-        printf("ERROR: Illegal action.\n");
+        if (not_exit) return FALSE;
+        printf("%s%s", ERR6, NEWLINE);
         exit(EXIT_FAILURE);
     }
-    return 1;
+    /* No errors */
+    return TRUE;
 }
 
+/*----------------------------------------------------------------------------*/
 /* Checks if a coordinate lies outside the board */
 int outside_board(coord_t *coord) {
     if (coord->col >= BOARD_SIZE || coord->col < 0 ||
@@ -245,80 +260,81 @@ int outside_board(coord_t *coord) {
     return FALSE;
 }
 
+/*----------------------------------------------------------------------------*/
 /* Checks if a cell is empty */
 int cell_empty(board_t board, coord_t *coord) {
     if (board[coord->row][coord->col] == CELL_EMPTY) {
-        //printf("here, %d %d, board: '%c'\n", coord->row, coord->col, board[coord->row][coord->col]);
         return TRUE;
     }
     return FALSE;
 }
 
+/*----------------------------------------------------------------------------*/
+/* Checks if two pieces are the same colour */
 int same_colour(char c1, char c2) {
     if (lower(c1) == lower(c2)) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
-/* Return the lowercase version of letters */
-char lower(char c) {
-    if (is_upper(c)) {
-        return (c + 32);
-    }
-    return c;
-}
-
-/* Return the uppercase version of letters */
-char upper(char c) {
-    if (!is_upper(c)) {
-        return (c - 32);
-    }
-    return c;
-}
-
+/*----------------------------------------------------------------------------*/
 /* Checks if a char is upper case */
 int is_upper(char c) {
     if ('A' <= c && c <= 'Z') {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
-/* Checks if an action is legal */
+/*----------------------------------------------------------------------------*/
+/* Return the lowercase version of letters */
+char lower(char c) {
+    if (is_upper(c)) {
+        return (c + LC_UC_DIFF);
+    }
+    return c;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Return the uppercase version of letters */
+char upper(char c) {
+    if (!is_upper(c)) {
+        return (c - LC_UC_DIFF);
+    }
+    return c;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Checks if a move is legal */
 int legal_action(board_t board, move_t *move, char from_piece) {
     char from_colour = lower(from_piece);
     int dir;
+
+    /* Determine the direction of allowed movement (non-tower) */
     if (from_colour == CELL_WPIECE) {
-        dir = +1;
+        dir = +1; // South
     } else {
-        dir = -1;
+        dir = -1; // North
+
     }
+    /* Determine how far the move is */
     coord_t dist = get_dist(move);
-    char cap_piece = lower(
-            board[move->from.row + dist.row / 2][move->from.col +
-                                                 dist.col / 2]);
-    if (dist.row == dir && (abs(dist.col) == 1)) {
-        /* Move is one cell diagonally */
-        return 1;
-    }
-    if (dist.row == dir * 2 && (abs(dist.col) == 2)) {
-        /* Move is two cells diagonally */
-        if (cap_piece != CELL_EMPTY && !same_colour(from_colour, cap_piece)) {
-            /* Captured cell is not empty and captured piece is the other
-             * player's */
-            return 1;
-        }
-    }
-    if (is_upper(from_piece)) {
-        //printf("yea\n");
-        /* Tower */
-        if (dist.row == -dir && (abs(dist.col) == 1)) {
+
+    /* Loop through valid moves and test if the provided move is one of them */
+    for (int i = 0; i < MAX_DIR; i++) {
+        if ((dist.row == dir) && (abs(dist.col) == 1)) {
             /* Move is one cell diagonally */
             return 1;
         }
-        if (dist.row == -dir * 2 && (abs(dist.col) == 2)) {
+
+        if ((dist.row == dir * MAX_DIST) && (abs(dist.col) == MAX_DIST)) {
             /* Move is two cells diagonally */
+            /* Get the piece that is captured (1/2 of the distance of the
+             * move) */
+            char cap_piece = board[move->from.row + dist.row / 2][
+                    move->from.col + dist.col / 2];
+
             if (cap_piece != CELL_EMPTY &&
                 !same_colour(from_colour, cap_piece)) {
                 /* Captured cell is not empty and captured piece is the other
@@ -326,11 +342,22 @@ int legal_action(board_t board, move_t *move, char from_piece) {
                 return 1;
             }
         }
+
+        if (!is_upper(from_piece)) {
+            /* Not a tower, stop testing */
+            break;
+        } else {
+            /* Run the loop again to check for the moves in the opposite
+             * direction that towers can make */
+            dir = -dir;
+        }
     }
+    /* Move is not valid */
     return 0;
 }
 
-/* Gets the distance between two cells */
+/*----------------------------------------------------------------------------*/
+/* Returns the vector distance of a move */
 coord_t get_dist(move_t *move) {
     coord_t dist;
     dist.row = move->to.row - move->from.row;
@@ -338,46 +365,36 @@ coord_t get_dist(move_t *move) {
     return dist;
 }
 
-/* Updates the board after a move has taken place */
+/*----------------------------------------------------------------------------*/
+/* Updates the board with the new move */
 void update_board(board_t board, move_t *move) {
     coord_t dist = get_dist(move);
-    char moved_piece = board[move->from.row][move->from.col];
 
     /* 'To' cell takes value of 'from' cell */
     if ((move->to.row == BOARD_SIZE - 1 || move->to.row == 0) &&
-        !is_upper(moved_piece)) {
-        /* Normal piece becomes a tower piece */
+        !is_upper(board[move->from.row][move->from.col])) {
+        /* Piece is at the top or bottom row of the board and isn't a tower.
+         * Normal piece becomes a tower piece */
         board[move->to.row][move->to.col] = upper(
                 board[move->from.row][move->from.col]);
     } else {
         /* Still a normal piece */
-        board[move->to.row][move->to.col] = board[move->from.row][move->from.col];
+        board[move->to.row][move->to.col] =
+                board[move->from.row][move->from.col];
     }
 
     /* Set 'from' cell to empty */
     board[move->from.row][move->from.col] = CELL_EMPTY;
-    //printf("at update board: %d %d %d %d\n", move->from.row, move->from.col, move->to.row, move->to.col);
-    //printf("dist?? %d %d\n", dist.row, dist.col);
+
     if (abs(dist.row) > 1) {
-        /* Make captured cell empty */
+        /* A capture has happened, make captured cell empty */
         board[move->from.row + dist.row / 2][move->from.col +
                                              dist.col / 2] = CELL_EMPTY;
     }
 }
 
-//int get_cost(board_t board, char nxt_turn) {
-//    int cost;
-//    if (has_won(board, nxt_turn)) {
-//        if (nxt_turn == CELL_WPIECE) {
-//            cost = INT_MAX;
-//        } else {
-//            cost = INT_MIN;
-//        }
-//        return cost;
-//    }
-//    return get_cost(board);
-//}
-
+/*----------------------------------------------------------------------------*/
+/* Calculate cost by Looping through board and counting pieces */
 int get_cost(board_t board) {
     int cost = 0;
     for (int row = 0; row < BOARD_SIZE; row++) {
@@ -398,16 +415,24 @@ int get_cost(board_t board) {
     return cost;
 }
 
+/*----------------------------------------------------------------------------*/
+/* Determine if a player has won */
 int has_won(board_t board, char nxt_turn) {
     move_ary psbl_mvs;
     int piece_found = FALSE;
     int valid_mv_found = FALSE;
+
+    /* Loop through board and find pieces that match the colour of the next
+     * turn. Then see if those pieces can be moved */
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
-            if (lower(board[row][col]) == nxt_turn) {
+            if (same_colour(board[row][col], nxt_turn)) {
                 piece_found = TRUE;
-                /* Get possible moves */
+
+                /* Find possible moves */
                 psbl_mvs = get_moves(row, col);
+
+                /* Loop through possible moves and test if they are valid */
                 for (int i = 0; i < MAX_MOVES; i++) {
                     if (move_valid(board, &psbl_mvs.moves[i],
                                    switch_colour(nxt_turn), TRUE)) {
@@ -417,20 +442,57 @@ int has_won(board_t board, char nxt_turn) {
             }
         }
     }
-    if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
-        /* Winning condition */
+    if (piece_found == FALSE ||
+        (piece_found = TRUE && valid_mv_found == FALSE)) {
+        /* Winning condition - opponent has no pieces left or their pieces
+         * can't move */
         return TRUE;
     }
     return FALSE;
 }
 
-
-/* Adds padding to output */
-void pad() {
-    printf("   ");
+/*----------------------------------------------------------------------------*/
+/* Return all possible (not necessarily valid) moves of a given coordinate */
+move_ary get_moves(int row, int col) {
+    move_ary new;
+    /* "From" coordinate doesn't change, so copy the original */
+    for (int i = 0; i < MAX_MOVES; i++) {
+        new.moves[i].from.row = row;
+        new.moves[i].from.col = col;
+    }
+    /* Add moves, starting from length BASE_MOVE to MAX_DIST from NE to NW
+     * in a clockwise direction */
+    for (int i = 0; i < MAX_DIST; i++) {
+        /* NE */
+        new.moves[0 + i].to.row = row - (i + BASE_MOVE);
+        new.moves[0 + i].to.col = col + (i + BASE_MOVE);
+    }
+    for (int i = 0; i < MAX_DIST; i++) {
+        /* SE */
+        new.moves[2 + i].to.row = row + (i + BASE_MOVE);
+        new.moves[2 + i].to.col = col + (i + BASE_MOVE);
+    }
+    for (int i = 0; i < MAX_DIST; i++) {
+        /* SW */
+        new.moves[4 + i].to.row = row + (i + BASE_MOVE);
+        new.moves[4 + i].to.col = col - (i + BASE_MOVE);
+    }
+    for (int i = 0; i < MAX_DIST; i++) {
+        /* NW */
+        new.moves[6 + i].to.row = row - (i + BASE_MOVE);
+        new.moves[6 + i].to.col = col - (i + BASE_MOVE);
+    }
+    return new;
 }
 
-/* Adds newline to output */
-void newline() {
-    printf("\n");
+/*----------------------------------------------------------------------------*/
+/* Changes the colour from black to white or white to black */
+char switch_colour(char orig) {
+    char new;
+    if (orig == CELL_WPIECE) {
+        new = CELL_BPIECE;
+    } else {
+        new = CELL_WPIECE;
+    }
+    return new;
 }

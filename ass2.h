@@ -54,19 +54,43 @@
 #define COST_PIECE          1       // one piece cost
 #define COST_TOWER          3       // one tower cost
 #define TREE_DEPTH          3       // minimax tree depth
-#define COMP_ACTIONS        10      // number of computed actions
+#define COMP_ACTIONS        100      // number of computed actions
 
 /* one type definition from my sample solution -------------------------------*/
 typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 
+/* No longer skeleton code ###################################################*/
 /* #defines ------------------------------------------------------------------*/
 #define TRUE 1
 #define FALSE 0
 #define NUM_PIECES (int) (ROWS_WITH_PIECES*BOARD_SIZE*0.5)
-// TODO: make row sep dynamic?
 #define ROW_SEP "+---+---+---+---+---+---+---+---+"
 #define COL_SEP "|"
+#define SPACE " "
+#define PADDING "   "
+#define NEWLINE "\n"
+#define BOARD_SEP "====================================="
+#define COMP_ACT_SIG "***" // Signifier for a computed action
 #define MAX_MOVES 8
+#define MAX_DIR 2
+#define MAX_DIST 2
+#define BASE_MOVE 1
+#define IND2ROW 1 // Index to row number
+#define IND2COL 'A' // Index to alphabetical char
+#define STAGE1CMD 'A'
+#define STAGE2CMD 'P'
+#define ERR1 "ERROR: Source cell is outside of the board."
+#define ERR2 "ERROR: Target cell is outside of the board."
+#define ERR3 "ERROR: Source cell is empty."
+#define ERR4 "ERROR: Target cell is not empty."
+#define ERR5 "ERROR: Source cell holds opponent's piece/tower."
+#define ERR6 "ERROR: Illegal action."
+#define LC_UC_DIFF 32 // Int difference between lower case and upper case chars
+#define INITIAL_TURNS 1
+#define NULL_MOVE '\0'
+#define INITIAL_DEPTH 1
+#define ROOT_MOVE (-1)
+
 
 /* typedefs ------------------------------------------------------------------*/
 typedef struct {
@@ -81,16 +105,19 @@ typedef struct {
 
 typedef struct {
     move_t moves[MAX_MOVES];
-} move_ary;
+} move_ary; // Array of moves
 
 typedef struct {
-    int action;
+    int is_stage1;
     char prev_turn;
     int num_turns;
-} nxt_act_t;
+} nxt_act_t; // Used for passing info between stage functions and main
+
+/* These list structs and tree structs are modelled after Alistair Moffat's code
+ * from https://people.eng.unimelb.edu.au/ammoffat/ppsaa/c/ */
 
 typedef struct lst_node lst_node_t;
-typedef struct state state_t;
+typedef struct state state_t; // A state of the game. It's a tree node
 
 struct lst_node {
     state_t *data;
@@ -108,31 +135,34 @@ struct state {
     move_t move;
     char cur_turn;
     lst_t *child_hdl;
-    int depth;
 };
 
 typedef struct {
     int cost;
     move_t move;
-    int depth;
-} cam_t;
+} cam_t; // Stands for cost and move
 
 
-/* Stage 0 ################################################################## */
+/* Stage 0 ------------------------------------------------------------------ */
 void do_stage0(board_t board, nxt_act_t *nxt_act);
 
 void init_board(board_t board);
+
+void prt_starting_info();
 
 void fill_pieces(int row_even, int row, board_t board, char piece);
 
 void prt_board(board_t board);
 
-void prt_from_input(board_t board, nxt_act_t *nxt_act);
+void read_and_prt(board_t board, nxt_act_t *nxt_act);
 
-void
-prt_inb(board_t board, nxt_act_t *nxt_act, move_t *move, int is_s1);
+void prt_move(move_t *move);
 
 int move_valid(board_t board, move_t *move, char prev_turn, int not_exit);
+
+void update_board(board_t board, move_t *move);
+
+void prt_bd_inf(board_t board, nxt_act_t *nxt_act, move_t *move, int is_stage1);
 
 int outside_board(coord_t *coord);
 
@@ -140,17 +170,15 @@ int cell_empty(board_t board, coord_t *coord);
 
 int same_colour(char c1, char c2);
 
+int is_upper(char c);
+
 char lower(char c);
 
 char upper(char c);
 
-int is_upper(char c);
-
 int legal_action(board_t board, move_t *move, char from_piece);
 
 coord_t get_dist(move_t *move);
-
-void update_board(board_t board, move_t *move);
 
 int get_cost(board_t board);
 
@@ -158,31 +186,26 @@ int has_won(board_t board, char nxt_turn);
 
 move_ary get_moves(int row, int col);
 
-void pad();
+char switch_colour(char orig);
 
-void newline();
-
-/* Stage 1 ################################################################## */
+/* Stage 1 ------------------------------------------------------------------ */
 void do_stage1(board_t board, nxt_act_t *nxt_act);
 
 void build_tree(state_t *parent, int depth);
 
-char switch_colour(char orig);
-
-void move_cpy(move_t *orig, move_t *new);
-
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
-
-void insert_child(lst_t *handle, state_t *data);
 
 state_t *init_root(board_t board, char cur_turn);
 
 lst_t *new_handle();
 
-void board_cpy(board_t orig, board_t new);
+void insert_child(lst_t *handle, state_t *data);
 
-cam_t backprop_cost(state_t *state, char order);
-
-void prt_move(move_t *move);
+cam_t run_minimax(state_t *state, char player);
 
 void free_tree(state_t *parent);
+
+void board_cpy(board_t orig, board_t new);
+
+void move_cpy(move_t *orig, move_t *new);
+
