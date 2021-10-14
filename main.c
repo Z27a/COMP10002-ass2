@@ -2,14 +2,12 @@
 
 int
 main(int argc, char *argv[]) {
-    //TODO: Add function separator lines after i've finished
-
     // YOUR IMPLEMENTATION OF STAGES 0-2
     board_t board;
     nxt_act_t next;
     /* Set starting values */
-    next.num_turns = 1;
-    next.prev_turn = '\0';
+    next.num_turns = INITIAL_TURNS;
+    next.prev_turn = NULL_MOVE;
     next.is_stage1 = FALSE;
 
     do_stage0(board, &next);

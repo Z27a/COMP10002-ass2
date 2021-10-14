@@ -333,7 +333,7 @@ int legal_action(board_t board, move_t *move, char from_piece) {
             /* Get the piece that is captured (1/2 of the distance of the
              * move) */
             char cap_piece = board[move->from.row + dist.row / 2][
-                                   move->from.col + dist.col / 2];
+                    move->from.col + dist.col / 2];
 
             if (cap_piece != CELL_EMPTY &&
                 !same_colour(from_colour, cap_piece)) {
@@ -481,6 +481,18 @@ move_ary get_moves(int row, int col) {
         /* NW */
         new.moves[6 + i].to.row = row - (i + BASE_MOVE);
         new.moves[6 + i].to.col = col - (i + BASE_MOVE);
+    }
+    return new;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Changes the colour from black to white or white to black */
+char switch_colour(char orig) {
+    char new;
+    if (orig == CELL_WPIECE) {
+        new = CELL_BPIECE;
+    } else {
+        new = CELL_WPIECE;
     }
     return new;
 }

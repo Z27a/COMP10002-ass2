@@ -1,67 +1,78 @@
 #include "ass2.h"
 
+/*----------------------------------------------------------------------------*/
+/* The list functions and tree functions used here are modelled after Alistair
+ * Moffat's code from https://people.eng.unimelb.edu.au/ammoffat/ppsaa/c/ */
+
 /* Stage 1 */
 void do_stage1(board_t board, nxt_act_t *nxt_act) {
-    if (nxt_act->prev_turn == '\0') {
+    if (nxt_act->prev_turn == NULL_MOVE) {
+        /* No moves have been read. Let black start first (i.e. last turn was
+         * white)*/
         nxt_act->prev_turn = CELL_WPIECE;
     }
-    /* initialise root */
-    state_t *root;
-    /* Insert previous prev_turn into root because the root is the built from the
-     * state of the game where the previous player had just played */
-    root = init_root(board, switch_colour(nxt_act->prev_turn));
-    // calculate possible moves and loop through them to run build tree
 
+    state_t *root = init_root(board, switch_colour(nxt_act->prev_turn));
 
-    build_tree(root, 1);
+    build_tree(root, INITIAL_DEPTH);
 
-    cam_t cam = backprop_cost(root, root->cur_turn);
+    /* Calculate the next most optimal move */
+    cam_t cam = run_minimax(root, root->cur_turn);
 
     free_tree(root);
 
     update_board(board, &cam.move);
-    //TODO: optimise to just use pre calculated stuff in tree
+
     prt_bd_inf(board, nxt_act, &cam.move, TRUE);
 
     nxt_act->num_turns++;
 }
 
-
+/*----------------------------------------------------------------------------*/
+/* Constructs the minimax tree */
 void build_tree(state_t *parent, int depth) {
     if (depth > TREE_DEPTH) {
-        /* Base case */
+        /* Base case - max depth reached */
         return;
     } else {
-        char prev_turn = switch_colour(parent->cur_turn);
         state_t *new;
         move_ary psbl_mvs;
         int piece_found = FALSE;
-        int valid_mv_found = FALSE;
+        int valid_move_found = FALSE;
+
+        /* Loop through board and find pieces that match the colour of the
+         * current turn. */
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 if (same_colour(parent->board[row][col], parent->cur_turn)) {
                     piece_found = TRUE;
-                    /* Get possible moves */
+
+                    /* Find possible moves */
                     psbl_mvs = get_moves(row, col);
+
+                    /* Loop through possible moves */
                     for (int i = 0; i < MAX_MOVES; i++) {
-                        if (move_valid(parent->board, &psbl_mvs.moves[i], prev_turn,
-                                       TRUE)) {
-                            valid_mv_found = TRUE;
-                            // malloc new data, update data
+                        if (move_valid(parent->board, &psbl_mvs.moves[i],
+                                       switch_colour(parent->cur_turn), TRUE)) {
+                            valid_move_found = TRUE;
+
+                            /* Create a child node with the current move */
                             new = new_child(parent->board, &psbl_mvs.moves[i],
                                             parent->cur_turn);
-                            new->depth = depth;
-                            // insert into child handle list
+
                             insert_child(parent->child_hdl, new);
-                            // run recursive function on the new child
+
+                            /* Run build tree on the new child */
                             build_tree(new, depth + 1);
                         }
                     }
                 }
             }
         }
-        if (piece_found == FALSE || (piece_found = TRUE && valid_mv_found == FALSE)) {
-            /* Winning condition */
+        if (piece_found == FALSE ||
+            (piece_found = TRUE && valid_move_found == FALSE)) {
+            /* Winning condition - opponent has no pieces left or their pieces
+             * can't move. Set the parent's cost to INT_MAX or INT_MIN */
             if (parent->cur_turn == CELL_WPIECE) {
                 parent->cost = INT_MAX;
             } else {
@@ -71,33 +82,24 @@ void build_tree(state_t *parent, int depth) {
     }
 }
 
-void free_tree(state_t *parent) {
-    assert(parent != NULL);
-    if (parent->child_hdl->head == NULL) {
-        /* Base case - no more children to free. */
-        free(parent->child_hdl);
-        free(parent);
-        return;
-    } else {
-        /* Loop through children and free them. This section is structured
-         * similarly to Alistair's code */
-        assert(parent->child_hdl != NULL);
-        lst_node_t *curr, *prev;
-        curr = parent->child_hdl->head;
-        while (curr) {
-            prev = curr;
-            curr = curr->next;
-            free_tree(prev->data);
-            free(prev);
-        }
-        free(parent->child_hdl);
-        free(parent);
-    }
+/*----------------------------------------------------------------------------*/
+/* Mallocs a new root state and sets the initial data for the root   */
+state_t *init_root(board_t board, char cur_turn) {
+    state_t *root = (state_t *) malloc(sizeof(*root));
+    assert(root != NULL);
+    board_cpy(board, root->board);
+    root->cost = get_cost(board);
+    root->cur_turn = cur_turn;
+    root->child_hdl = new_handle();
+    root->move.from.row = ROOT_MOVE;
+    return root;
 }
 
+/*----------------------------------------------------------------------------*/
+/* Mallocs a new child state and sets the data of this node based on a given
+ * move that got to the child state */
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
-    state_t *new;
-    new = (state_t *) malloc(sizeof(*new));
+    state_t *new = (state_t *) malloc(sizeof(*new));
     assert(new != NULL);
     board_cpy(prev_board, new->board);
     update_board(new->board, move);
@@ -108,103 +110,122 @@ state_t *new_child(board_t prev_board, move_t *move, char prev_turn) {
     return new;
 }
 
-void insert_child(lst_t *handle, state_t *data) {
+/*----------------------------------------------------------------------------*/
+/* Mallocs a new linked list handle and sets its initial values */
+lst_t *new_handle() {
+    lst_t *handle;
+    handle = (lst_t *) malloc(sizeof(*handle));
     assert(handle != NULL);
-    lst_node_t *new;
-    new = (lst_node_t *) malloc(sizeof(lst_node_t));
+    handle->head = handle->foot = NULL;
+    return handle;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Insert a child into a parent's linked list. Also creates a new list node */
+void insert_child(lst_t *handle, state_t *data) {
+    lst_node_t *new = (lst_node_t *) malloc(sizeof(*new));
     assert(new != NULL);
     new->next = NULL;
     new->data = data;
 
     if (handle->foot == NULL) {
-        /* First insertion */
+        /* The list's first insertion */
         handle->head = handle->foot = new;
     } else {
+        /* Not the first node in the list */
         handle->foot->next = new;
         handle->foot = new;
     }
 }
 
-state_t *init_root(board_t board, char cur_turn) {
-    state_t *root;
-    root = (state_t *) malloc(sizeof(state_t));
-    assert(root != NULL);
-    //TODO: remember to have assertions. Disclose I used alistair's programs?
-    board_cpy(board, root->board);
-    root->cost = get_cost(board);
-    root->cur_turn = cur_turn;
-    root->child_hdl = new_handle();
-    root->move.from.row = -1;
-    root->depth = 0;
-    return root;
-}
-
-lst_t *new_handle() {
-    lst_t *handle;
-    handle = (lst_t *) malloc(sizeof(lst_t));
-    assert(handle!=NULL);
-    handle->head = handle->foot = NULL;
-    return handle;
-}
-
-
-cam_t backprop_cost(state_t *state, char order) {
+/*----------------------------------------------------------------------------*/
+/* Runs the minimax algorithm. Returns the next best move and back propagated
+ * cost of children nodes */
+cam_t run_minimax(state_t *state, char player) {
     cam_t cam;
     if (state->child_hdl->head == NULL) {
-        /* Leaf node, no more children, base case. Return cost of current
-         * leaf node*/
+        /* Base case - the current state has no more children. Return cost and
+         * move of current state */
         cam.cost = state->cost;
         cam.move = state->move;
-        cam.depth = state->depth;
     } else {
-        /* Recursive case. Return max or min cost of child states */
-        cam = backprop_cost(state->child_hdl->head->data, switch_colour(order));
-        if (state->move.from.row != -1) {
-            /* If current state is not the root, return the move and depth of
-             * the current state */
+        /* Recursive case. */
+        /* Run minimax on the first element of the list of child states */
+        cam = run_minimax(state->child_hdl->head->data, switch_colour(player));
+
+        if (state->move.from.row != ROOT_MOVE) {
+            /* Current state is not the root, return the move of the current
+             * state */
             cam.move = state->move;
-            //cam.depth = state->depth;
         } else {
-            /* The current state is the root. Return the move of the min/max
-             * cost child state */
+            /* The current state is the root. Return the move of the
+             * child state */
             cam.move = state->child_hdl->head->data->move;
         }
-        cam_t temp_cam;
-        /* pointer to the first next element in the list */
+
+        /* Pointer to the first next element in the list */
         lst_node_t *next_elem = state->child_hdl->head->next;
-        while (next_elem != NULL) { //TODO: could use for loop here?
-            temp_cam = backprop_cost(next_elem->data, switch_colour(order));
-            if (order == CELL_WPIECE) {
-                /* Minimise cost, Update cam with lower cost */
+        cam_t temp_cam;
+
+        while (next_elem != NULL) {
+            /* Run minimax on all children in the list */
+            temp_cam = run_minimax(next_elem->data, switch_colour(player));
+
+            if (player == CELL_WPIECE) {
+                /* Minimise cost */
                 if (cam.cost > temp_cam.cost) {
+                    /* Update cost and move */
                     cam.cost = temp_cam.cost;
-                    cam.depth = temp_cam.depth;
-                    if (state->move.from.row != -1) {
-                        cam.move = state->move;
-                    } else {
+                    if (state->move.from.row == ROOT_MOVE) {
                         cam.move = next_elem->data->move;
                     }
                 }
             } else {
                 /* Maximise cost */
                 if (cam.cost < temp_cam.cost) {
+                    /* Update cost and move */
                     cam.cost = temp_cam.cost;
-                    cam.depth = temp_cam.depth;
-                    if (state->move.from.row != -1) {
-                        cam.move = state->move;
-                    } else {
+                    if (state->move.from.row == ROOT_MOVE) {
                         cam.move = next_elem->data->move;
                     }
                 }
             }
+
             next_elem = next_elem->next;
         }
     }
     return cam;
 }
 
+/*----------------------------------------------------------------------------*/
+/* Frees all malloced memory in the tree */
+void free_tree(state_t *parent) {
+    assert(parent != NULL);
+    if (parent->child_hdl->head == NULL) {
+        /* Base case - no more children to free. */
+        free(parent->child_hdl);
+        free(parent);
+        return;
+    } else {
+        /* Loop through children and free them. */
+        assert(parent->child_hdl != NULL);
+        lst_node_t *curr, *prev;
+        curr = parent->child_hdl->head;
+        while (curr) {
+            prev = curr;
+            curr = curr->next;
+            free_tree(prev->data);
+            free(prev);
+        }
+        /* All children freed, free parent */
+        free(parent->child_hdl);
+        free(parent);
+    }
+}
 
-/* Copies the contents of one board onto another */
+/*----------------------------------------------------------------------------*/
+/* Copies the contents of one board onto another by looping through the entire
+ * board */
 void board_cpy(board_t orig, board_t new) {
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
@@ -213,19 +234,11 @@ void board_cpy(board_t orig, board_t new) {
     }
 }
 
+/*----------------------------------------------------------------------------*/
+/* Copies the contents of one move to another */
 void move_cpy(move_t *orig, move_t *new) {
     new->to = orig->to;
     new->from = orig->from;
-}
-
-char switch_colour(char orig) {
-    char new;
-    if (orig == CELL_WPIECE) {
-        new = CELL_BPIECE;
-    } else {
-        new = CELL_WPIECE;
-    }
-    return new;
 }
 
 /* THE END -------------------------------------------------------------------*/

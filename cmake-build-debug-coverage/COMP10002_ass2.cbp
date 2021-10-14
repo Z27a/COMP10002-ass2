@@ -71,6 +71,50 @@
 					<DistClean command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="submission">
+				<Option output="C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/submission.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="msvc8"/>
+				<Compiler>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\include"/>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\ucrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\shared"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\winrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\cppwinrt"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 submission"/>
+					<CompileFile command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 clean"/>
+					<DistClean command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="submission/fast">
+				<Option output="C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage/submission.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="msvc8"/>
+				<Compiler>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\ATLMFC\include"/>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30037\include"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\ucrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\shared"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\winrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.19041.0\cppwinrt"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 submission/fast"/>
+					<CompileFile command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 clean"/>
+					<DistClean command="nmake /NOLOGO /f C:\Users\leoli\CLionProjects\COMP10002-ass2\cmake-build-debug-coverage\Makefile VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 			<Target title="edit_cache">
 				<Option working_dir="C:/Users/leoli/CLionProjects/COMP10002-ass2/cmake-build-debug-coverage"/>
 				<Option type="4"/>
@@ -93,6 +137,9 @@
 		</Unit>
 		<Unit filename="C:/Users/leoli/CLionProjects/COMP10002-ass2/stage1.c">
 			<Option target="COMP10002_ass2"/>
+		</Unit>
+		<Unit filename="C:/Users/leoli/CLionProjects/COMP10002-ass2/submission.c">
+			<Option target="submission"/>
 		</Unit>
 		<Unit filename="C:/Users/leoli/CLionProjects/COMP10002-ass2/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>

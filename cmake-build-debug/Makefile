@@ -118,6 +118,19 @@ COMP10002_ass2\fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\build
 .PHONY : COMP10002_ass2\fast
 
+#=============================================================================
+# Target rules for targets named submission
+
+# Build rule for target.
+submission: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Makefile2 /nologo -$(MAKEFLAGS) submission
+.PHONY : submission
+
+# fast build rule for target.
+submission\fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\submission.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\submission.dir\build
+.PHONY : submission\fast
+
 main.obj: main.c.obj
 .PHONY : main.obj
 
@@ -190,6 +203,30 @@ stage1.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\COMP10002_ass2.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\COMP10002_ass2.dir\stage1.c.s
 .PHONY : stage1.c.s
 
+submission.obj: submission.c.obj
+.PHONY : submission.obj
+
+# target to build an object file
+submission.c.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\submission.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\submission.dir\submission.c.obj
+.PHONY : submission.c.obj
+
+submission.i: submission.c.i
+.PHONY : submission.i
+
+# target to preprocess a source file
+submission.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\submission.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\submission.dir\submission.c.i
+.PHONY : submission.c.i
+
+submission.s: submission.c.s
+.PHONY : submission.s
+
+# target to generate assembly for a file
+submission.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\submission.dir\build.make /nologo -$(MAKEFLAGS) CMakeFiles\submission.dir\submission.c.s
+.PHONY : submission.c.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -199,6 +236,7 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... COMP10002_ass2
+	@echo ... submission
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
@@ -208,6 +246,9 @@ help:
 	@echo ... stage1.obj
 	@echo ... stage1.i
 	@echo ... stage1.s
+	@echo ... submission.obj
+	@echo ... submission.i
+	@echo ... submission.s
 .PHONY : help
 
 

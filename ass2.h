@@ -54,7 +54,7 @@
 #define COST_PIECE          1       // one piece cost
 #define COST_TOWER          3       // one tower cost
 #define TREE_DEPTH          3       // minimax tree depth
-#define COMP_ACTIONS        10000      // number of computed actions
+#define COMP_ACTIONS        100      // number of computed actions
 
 /* one type definition from my sample solution -------------------------------*/
 typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
@@ -86,6 +86,10 @@ typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 #define ERR5 "ERROR: Source cell holds opponent's piece/tower."
 #define ERR6 "ERROR: Illegal action."
 #define LC_UC_DIFF 32 // Int difference between lower case and upper case chars
+#define INITIAL_TURNS 1
+#define NULL_MOVE '\0'
+#define INITIAL_DEPTH 1
+#define ROOT_MOVE (-1)
 
 
 /* typedefs ------------------------------------------------------------------*/
@@ -109,10 +113,12 @@ typedef struct {
     int num_turns;
 } nxt_act_t; // Used for passing info between stage functions and main
 
-typedef struct lst_node lst_node_t;
-typedef struct state state_t;
+/* These list structs and tree structs are modelled after Alistair Moffat's code
+ * from https://people.eng.unimelb.edu.au/ammoffat/ppsaa/c/ */
 
-/* These list structs are modelled after Alistair Moffat's code */
+typedef struct lst_node lst_node_t;
+typedef struct state state_t; // A state of the game. It's a tree node
+
 struct lst_node {
     state_t *data;
     lst_node_t *next;
@@ -129,17 +135,15 @@ struct state {
     move_t move;
     char cur_turn;
     lst_t *child_hdl;
-    int depth;
 };
 
 typedef struct {
     int cost;
     move_t move;
-    int depth;
 } cam_t; // Stands for cost and move
 
 
-/* Stage 0 ################################################################## */
+/* Stage 0 ------------------------------------------------------------------ */
 void do_stage0(board_t board, nxt_act_t *nxt_act);
 
 void init_board(board_t board);
@@ -182,25 +186,26 @@ int has_won(board_t board, char nxt_turn);
 
 move_ary get_moves(int row, int col);
 
-/* Stage 1 ################################################################## */
+char switch_colour(char orig);
+
+/* Stage 1 ------------------------------------------------------------------ */
 void do_stage1(board_t board, nxt_act_t *nxt_act);
 
 void build_tree(state_t *parent, int depth);
 
-char switch_colour(char orig);
-
-void move_cpy(move_t *orig, move_t *new);
-
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
-
-void insert_child(lst_t *handle, state_t *data);
 
 state_t *init_root(board_t board, char cur_turn);
 
 lst_t *new_handle();
 
-void board_cpy(board_t orig, board_t new);
+void insert_child(lst_t *handle, state_t *data);
 
-cam_t backprop_cost(state_t *state, char order);
+cam_t run_minimax(state_t *state, char player);
 
 void free_tree(state_t *parent);
+
+void board_cpy(board_t orig, board_t new);
+
+void move_cpy(move_t *orig, move_t *new);
+
