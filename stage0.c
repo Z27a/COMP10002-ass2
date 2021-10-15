@@ -63,20 +63,10 @@ void fill_pieces(int row_even, int row, board_t board, char piece) {
 /*----------------------------------------------------------------------------*/
 /* Print initial game configuration info */
 void prt_starting_info() {
-    printf("BOARD SIZE: %dx%d\n", BOARD_SIZE, BOARD_SIZE);
-    printf("#BLACK PIECES: %d\n", NUM_PIECES);
-    printf("#WHITE PIECES: %d\n", NUM_PIECES);
-    /* Well, here's the #defined version:
-     *
-     - #define BDSZMSG "BOARD SIZE:"
-     - #define BPCEMSG "#BLACK PIECES:"
-     - #define WPCEMSG "#WHITE PIECES:"
-     - printf("%s%s%dx%d%s", BDSZMSG, SPACE, BOARD_SIZE, BOARD_SIZE, NEWLINE);
-     - printf("%s%s%d%s", BPCEMSG, SPACE, NUM_PIECES, NEWLINE);
-     - printf("%s%s%d%s", WPCEMSG, SPACE, NUM_PIECES, NEWLINE);
-     *
-     * but I think it's a lot less readable, and I hope I can convince you of
-     * that as well, so I won't be #defining some stuff in this assignment */
+    printf("%s%s%dx%d%s", BDSZMSG, SPACE, BOARD_SIZE, BOARD_SIZE, NEWLINE);
+    printf("%s%s%d%s", BPCEMSG, SPACE, NUM_PIECES, NEWLINE);
+    printf("%s%s%d%s", WPCEMSG, SPACE, NUM_PIECES, NEWLINE);
+
 }
 
 /*----------------------------------------------------------------------------*/
@@ -167,25 +157,25 @@ void prt_bd_inf(board_t board, nxt_act_t *nxt_act, move_t *move,
     if (is_stage1) printf("%s%s", COMP_ACT_SIG, SPACE);
 
     if (nxt_act->prev_turn == CELL_WPIECE) {
-        printf("BLACK ACTION%s", SPACE);
+        printf("%s%s", BACTMSG, SPACE);
     } else {
-        printf("WHITE ACTION%s", SPACE);
+        printf("%s%s", WACTMSG, SPACE);
     }
 
     printf("#%d:%s", nxt_act->num_turns, SPACE);
 
     prt_move(move);
 
-    printf("BOARD COST: %d\n", get_cost(board));
+    printf("%s%s%d%s", BCOSTMSG, SPACE ,get_cost(board), NEWLINE);
 
     prt_board(board);
 
     /* Check for a winner. Print winner and exit if there is one */
     if (has_won(board, nxt_act->prev_turn)) {
         if (nxt_act->prev_turn == CELL_WPIECE) {
-            printf("BLACK WIN!\n");
+            printf("%s%s", BWINMSG, NEWLINE);
         } else {
-            printf("WHITE WIN!\n");
+            printf("%s%s", WWINMSG, NEWLINE);
         }
         exit(EXIT_SUCCESS);
     }

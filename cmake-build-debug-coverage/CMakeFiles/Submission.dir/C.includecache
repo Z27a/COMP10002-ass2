@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/c/Users/leoli/CLionProjects/COMP10002-ass2/submission.c
+stdlib.h
+-
+stdio.h
+-
+limits.h
+-
+assert.h
+-
+

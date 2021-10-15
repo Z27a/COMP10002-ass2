@@ -1,8 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/submission.dir/submission.c.obj"
-  "submission.exe"
-  "submission.exe.manifest"
-  "submission.lib"
+  "CMakeFiles/submission.dir/submission.c.o"
+  "submission"
   "submission.pdb"
 )
 

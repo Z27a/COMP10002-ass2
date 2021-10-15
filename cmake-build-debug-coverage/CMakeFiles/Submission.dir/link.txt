@@ -1,0 +1,1 @@
+/usr/bin/cc --coverage -g   CMakeFiles/submission.dir/submission.c.o  -o submission 

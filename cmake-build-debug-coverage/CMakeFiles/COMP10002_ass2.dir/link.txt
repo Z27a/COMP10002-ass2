@@ -1,0 +1,1 @@
+/usr/bin/cc --coverage -g   CMakeFiles/COMP10002_ass2.dir/main.c.o CMakeFiles/COMP10002_ass2.dir/stage0.c.o CMakeFiles/COMP10002_ass2.dir/stage1.c.o  -o COMP10002_ass2 

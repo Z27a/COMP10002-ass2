@@ -54,7 +54,7 @@
 #define COST_PIECE          1       // one piece cost
 #define COST_TOWER          3       // one tower cost
 #define TREE_DEPTH          3       // minimax tree depth
-#define COMP_ACTIONS        100      // number of computed actions
+#define COMP_ACTIONS        10      // number of computed actions
 
 /* one type definition from my sample solution -------------------------------*/
 typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
@@ -79,6 +79,14 @@ typedef unsigned char board_t[BOARD_SIZE][BOARD_SIZE];  // board type
 #define IND2COL 'A' // Index to alphabetical char
 #define STAGE1CMD 'A'
 #define STAGE2CMD 'P'
+#define BDSZMSG "BOARD SIZE:"
+#define BPCEMSG "#BLACK PIECES:"
+#define WPCEMSG "#WHITE PIECES:"
+#define BACTMSG "BLACK ACTION"
+#define WACTMSG "WHITE ACTION"
+#define BCOSTMSG "BOARD COST:"
+#define BWINMSG "BLACK WIN!"
+#define WWINMSG "WHITE WIN!"
 #define ERR1 "ERROR: Source cell is outside of the board."
 #define ERR2 "ERROR: Target cell is outside of the board."
 #define ERR3 "ERROR: Source cell is empty."
@@ -143,69 +151,38 @@ typedef struct {
 } cam_t; // Stands for cost and move
 
 
-/* Stage 0 ------------------------------------------------------------------ */
+/* Stage 0 */
 void do_stage0(board_t board, nxt_act_t *nxt_act);
-
 void init_board(board_t board);
-
 void prt_starting_info();
-
 void fill_pieces(int row_even, int row, board_t board, char piece);
-
 void prt_board(board_t board);
-
 void read_and_prt(board_t board, nxt_act_t *nxt_act);
-
 void prt_move(move_t *move);
-
 int move_valid(board_t board, move_t *move, char prev_turn, int not_exit);
-
 void update_board(board_t board, move_t *move);
-
 void prt_bd_inf(board_t board, nxt_act_t *nxt_act, move_t *move, int is_stage1);
-
 int outside_board(coord_t *coord);
-
 int cell_empty(board_t board, coord_t *coord);
-
 int same_colour(char c1, char c2);
-
 int is_upper(char c);
-
 char lower(char c);
-
 char upper(char c);
-
 int legal_action(board_t board, move_t *move, char from_piece);
-
 coord_t get_dist(move_t *move);
-
 int get_cost(board_t board);
-
 int has_won(board_t board, char nxt_turn);
-
 move_ary get_moves(int row, int col);
-
 char switch_colour(char orig);
 
-/* Stage 1 ------------------------------------------------------------------ */
+/* Stage 1 */
 void do_stage1(board_t board, nxt_act_t *nxt_act);
-
 void build_tree(state_t *parent, int depth);
-
 state_t *new_child(board_t prev_board, move_t *move, char prev_turn);
-
 state_t *init_root(board_t board, char cur_turn);
-
 lst_t *new_handle();
-
 void insert_child(lst_t *handle, state_t *data);
-
 cam_t run_minimax(state_t *state, char player);
-
 void free_tree(state_t *parent);
-
 void board_cpy(board_t orig, board_t new);
-
 void move_cpy(move_t *orig, move_t *new);
-
